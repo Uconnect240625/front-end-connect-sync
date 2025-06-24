@@ -44,6 +44,11 @@ export default function Auth() {
       const { data, error } = await supabase.from('universities').select('*');
       if (error) {
         console.error('Error fetching universities:', error);
+        toast({
+          title: "Warning",
+          description: "Could not load universities. Please refresh the page.",
+          variant: "destructive"
+        });
       } else {
         setUniversities(data || []);
       }
@@ -57,9 +62,11 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      console.log('Attempting login for:', loginEmail);
       const { error } = await signIn(loginEmail, loginPassword);
       
       if (error) {
+        console.error('Login error:', error);
         toast({
           title: "Login Failed",
           description: error.message || "An error occurred during login",
@@ -73,6 +80,7 @@ export default function Auth() {
         navigate('/');
       }
     } catch (err) {
+      console.error('Login catch error:', err);
       toast({
         title: "Login Failed",
         description: "An unexpected error occurred",
@@ -98,6 +106,13 @@ export default function Auth() {
     }
 
     try {
+      console.log('Attempting signup with data:', {
+        email: signupEmail,
+        full_name: fullName,
+        role,
+        university_id: universityId
+      });
+
       const { error } = await signUp(signupEmail, signupPassword, {
         full_name: fullName,
         role,
@@ -106,12 +121,27 @@ export default function Auth() {
       
       if (error) {
         console.error('Signup error details:', error);
+        
+        // Provide more specific error messages
+        let errorMessage = error.message || "Failed to create account. Please try again.";
+        
+        if (error.message?.includes('Database error')) {
+          errorMessage = "There was an issue creating your profile. Please check all fields and try again.";
+        } else if (error.message?.includes('already registered')) {
+          errorMessage = "An account with this email already exists. Please try logging in instead.";
+        } else if (error.message?.includes('invalid email')) {
+          errorMessage = "Please enter a valid email address.";
+        } else if (error.message?.includes('weak password')) {
+          errorMessage = "Password must be at least 6 characters long.";
+        }
+        
         toast({
           title: "Signup Failed",
-          description: error.message || "Failed to create account. Please try again.",
+          description: errorMessage,
           variant: "destructive"
         });
       } else {
+        console.log('Signup successful');
         toast({
           title: "Account Created!",
           description: "Your account has been created successfully. You can now log in."
@@ -124,7 +154,7 @@ export default function Auth() {
         setUniversityId('');
       }
     } catch (err) {
-      console.error('Signup error:', err);
+      console.error('Signup catch error:', err);
       toast({
         title: "Signup Failed",
         description: "An unexpected error occurred. Please try again.",
@@ -189,6 +219,7 @@ export default function Auth() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
+                    placeholder="Enter your full name"
                   />
                 </div>
                 <div className="space-y-2">
@@ -199,6 +230,7 @@ export default function Auth() {
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
                     required
+                    placeholder="Enter your email address"
                   />
                 </div>
                 <div className="space-y-2">
@@ -209,6 +241,8 @@ export default function Auth() {
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
                     required
+                    placeholder="Choose a secure password (min 6 characters)"
+                    minLength={6}
                   />
                 </div>
                 <div className="space-y-2">
