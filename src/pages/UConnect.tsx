@@ -23,7 +23,7 @@ const UConnect = () => {
       <div className="w-full max-w-lg p-8">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-semibold text-black mb-2">
-            <span className="bg-white px-1 mx-1 rounded">U</span>Connect
+            <span className="px-1 mx-1 rounded">U</span>Connect
           </h1>
           <p className="text-gray-600">Your Campus in One App</p>
         </header>

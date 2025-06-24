@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
 import UConnect from "./pages/UConnect";
 import NotFound from "./pages/NotFound";
 import MessMenu from "./pages/MessMenu";
@@ -24,7 +23,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<UConnect />} />
           <Route path="/uconnect" element={<UConnect />} />
           <Route path="/mess-menu" element={<MessMenu />} />
           <Route path="/notes" element={<NotesHub />} />
