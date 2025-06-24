@@ -7,6 +7,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import UConnect from "./pages/UConnect";
 import NotFound from "./pages/NotFound";
+import MessMenu from "./pages/MessMenu";
+import NotesHub from "./pages/NotesHub";
+import EventCalendar from "./pages/EventCalendar";
+import Marketplace from "./pages/Marketplace";
+import PGFinder from "./pages/PGFinder";
+import Announcements from "./pages/Announcements";
+import HelpCenter from "./pages/HelpCenter";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +26,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/uconnect" element={<UConnect />} />
+          <Route path="/mess-menu" element={<MessMenu />} />
+          <Route path="/notes" element={<NotesHub />} />
+          <Route path="/events" element={<EventCalendar />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/pg-finder" element={<PGFinder />} />
+          <Route path="/announcements" element={<Announcements />} />
+          <Route path="/help" element={<HelpCenter />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
