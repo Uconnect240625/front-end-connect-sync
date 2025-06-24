@@ -16,6 +16,17 @@ import Marketplace from "./pages/Marketplace";
 import PGFinder from "./pages/PGFinder";
 import Announcements from "./pages/Announcements";
 import HelpCenter from "./pages/HelpCenter";
+import MessMenuAdmin from "./pages/MessMenuAdmin";
+import PostClubEvent from "./pages/PostClubEvent";
+import ClubDashboard from "./pages/ClubDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import PostRoommateRequest from "./pages/PostRoommateRequest";
+import ListProduct from "./pages/ListProduct";
+import UploadNotes from "./pages/UploadNotes";
+import AdminRevenue from "./pages/AdminRevenue";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import PostNotice from "./pages/PostNotice";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +82,62 @@ const App = () => (
             <Route path="/help" element={
               <ProtectedRoute>
                 <HelpCenter />
+              </ProtectedRoute>
+            } />
+            {/* New routes for converted pages */}
+            <Route path="/mess-menu-admin" element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <MessMenuAdmin />
+              </ProtectedRoute>
+            } />
+            <Route path="/post-club-event" element={
+              <ProtectedRoute>
+                <PostClubEvent />
+              </ProtectedRoute>
+            } />
+            <Route path="/club-dashboard" element={
+              <ProtectedRoute>
+                <ClubDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin-dashboard" element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/post-roommate-request" element={
+              <ProtectedRoute>
+                <PostRoommateRequest />
+              </ProtectedRoute>
+            } />
+            <Route path="/list-product" element={
+              <ProtectedRoute>
+                <ListProduct />
+              </ProtectedRoute>
+            } />
+            <Route path="/upload-notes" element={
+              <ProtectedRoute>
+                <UploadNotes />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin-revenue" element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <AdminRevenue />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin-analytics" element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <AdminAnalytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/post-notice" element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <PostNotice />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

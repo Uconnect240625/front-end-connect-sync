@@ -49,13 +49,43 @@ const UConnect = () => {
             ))}
           </section>
 
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 space-y-3">
             <button
               onClick={() => navigate('/announcements')}
               className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors mr-4"
             >
               📢 Announcements
             </button>
+            
+            <div className="flex gap-2 justify-center flex-wrap">
+              <button
+                onClick={() => navigate('/club-dashboard')}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                🎭 Club Dashboard
+              </button>
+              
+              <button
+                onClick={() => navigate('/post-roommate-request')}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+              >
+                🏠 Post Roommate Request
+              </button>
+              
+              <button
+                onClick={() => navigate('/upload-notes')}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              >
+                📤 Upload Notes
+              </button>
+              
+              <button
+                onClick={() => navigate('/settings')}
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm"
+              >
+                ⚙️ Settings
+              </button>
+            </div>
           </div>
 
           <footer className="text-center mt-8">
