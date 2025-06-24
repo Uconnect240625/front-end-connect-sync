@@ -447,10 +447,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_missing_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       get_all_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
