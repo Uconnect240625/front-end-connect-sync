@@ -40,29 +40,46 @@ export default function Auth() {
   }, []);
 
   const fetchUniversities = async () => {
-    const { data } = await supabase.from('universities').select('*');
-    setUniversities(data || []);
+    try {
+      const { data, error } = await supabase.from('universities').select('*');
+      if (error) {
+        console.error('Error fetching universities:', error);
+      } else {
+        setUniversities(data || []);
+      }
+    } catch (err) {
+      console.error('Universities fetch error:', err);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(loginEmail, loginPassword);
-    
-    if (error) {
+    try {
+      const { error } = await signIn(loginEmail, loginPassword);
+      
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message || "An error occurred during login",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have been logged in successfully."
+        });
+        navigate('/');
+      }
+    } catch (err) {
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: "An unexpected error occurred",
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Welcome back!",
-        description: "You have been logged in successfully."
-      });
-      navigate('/');
     }
+    
     setLoading(false);
   };
 
@@ -80,24 +97,41 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(signupEmail, signupPassword, {
-      full_name: fullName,
-      role,
-      university_id: universityId
-    });
-    
-    if (error) {
+    try {
+      const { error } = await signUp(signupEmail, signupPassword, {
+        full_name: fullName,
+        role,
+        university_id: universityId
+      });
+      
+      if (error) {
+        console.error('Signup error details:', error);
+        toast({
+          title: "Signup Failed",
+          description: error.message || "Failed to create account. Please try again.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Account Created!",
+          description: "Your account has been created successfully. You can now log in."
+        });
+        // Clear form
+        setSignupEmail('');
+        setSignupPassword('');
+        setFullName('');
+        setRole('');
+        setUniversityId('');
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
       toast({
         title: "Signup Failed",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Account Created!",
-        description: "Please check your email to verify your account."
-      });
     }
+    
     setLoading(false);
   };
 
