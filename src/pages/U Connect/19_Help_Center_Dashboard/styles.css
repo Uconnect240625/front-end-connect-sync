@@ -1,0 +1,62 @@
+/* Help_Center_Dashboard CSS goes here */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #cf0a2c;
+      margin-bottom: 25px;
+    }
+
+    .complaint-card {
+      background-color: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .complaint-card h3 {
+      margin: 0 0 8px;
+      color: #333;
+    }
+
+    .complaint-card p {
+      margin: 0 0 6px;
+      font-size: 14px;
+    }
+
+    .status {
+      font-size: 13px;
+      font-weight: bold;
+      color: green;
+      text-align: right;
+    }
+
+    .pending {
+      color: #e67e22;
+    }
+
+    .resolved {
+      color: #27ae60;
+    }
+
+    .action-btn {
+      background-color: #0083C1;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-top: 8px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .action-btn:hover{
+      background-color: #cf0a2c;
+    }

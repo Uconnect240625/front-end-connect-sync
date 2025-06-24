@@ -1,0 +1,47 @@
+<!-- Notifications HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notifications</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="header">🔔 Notifications</div>
+
+  <div class="filter-bar">
+    <div class="filter active">All</div>
+    <div class="filter">Official</div>
+    <div class="filter">Clubs</div>
+    <div class="filter">Hostel</div>
+    <div class="filter">Academics</div>
+    <div class="filter">Emergency</div>
+  </div>
+
+  <div class="notifications" id="notifications">
+
+    <div class="notice" data-type="Official">
+      <h3>Class Suspension Notice</h3>
+      <p>All classes are suspended tomorrow due to heavy rainfall.</p>
+      <div class="date">June 17, 2025</div>
+    </div>
+
+    <div class="notice" data-type="Clubs">
+      <h3>Photography Club Event</h3>
+      <p>Join the flash walk on 18th June! Register now.</p>
+      <div class="date">June 16, 2025</div>
+    </div>
+
+    <div class="notice" data-type="Emergency">
+      <h3>Urgent: Power Cut Alert</h3>
+      <p>Power will be cut in Block D from 2PM–4PM today.</p>
+      <div class="date">June 16, 2025</div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

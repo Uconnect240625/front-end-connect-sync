@@ -1,0 +1,35 @@
+<!-- Mess_Menu_Admin HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mess Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h2>Mess Menu Admin Panel</h2>
+
+  <div class="panel">
+    <label for="day">Select Day</label>
+    <select id="day">
+      <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+      <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+    </select>
+
+    <label for="meal">Select Meal</label>
+    <select id="meal">
+      <option>Breakfast</option><option>Lunch</option><option>Dinner</option>
+    </select>
+
+    <label for="items">Enter Menu Items</label>
+    <input type="text" id="items" placeholder="e.g., Chole Bhature, Salad, Rice">
+
+    <button onclick="saveMenu()">Save Menu</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

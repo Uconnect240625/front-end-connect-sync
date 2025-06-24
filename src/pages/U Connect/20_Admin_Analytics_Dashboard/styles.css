@@ -1,0 +1,56 @@
+/* Admin_Analytics_Dashboard CSS goes here */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f3f3f3;
+    }
+
+    h2 {
+      text-align: center;
+      color: #cf0a2c;
+      margin-bottom: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .card h3 {
+      margin: 0;
+      color: #333;
+      font-size: 22px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #777;
+      margin-top: 8px;
+    }
+
+    .icon {
+      font-size: 30px;
+      margin-bottom: 12px;
+      color: #cf0a2c;
+    }
+
+    .charts {
+      margin-top: 40px;
+    }
+
+    canvas {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }

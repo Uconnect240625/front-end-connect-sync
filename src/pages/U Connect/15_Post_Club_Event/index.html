@@ -1,0 +1,41 @@
+<!-- Post_Club_Event HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post Club Event - U Connect</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+    <h2>Post <span>Club</span> Event</h2>
+
+    <form>
+      <label for="eventName">Event Title</label>
+      <input type="text" id="eventName" placeholder="Enter event name" required />
+
+      <label for="eventDesc">Description</label>
+      <textarea id="eventDesc" rows="4" placeholder="Enter event details..." required></textarea>
+
+      <label for="eventDate">Date</label>
+      <input type="date" id="eventDate" required />
+
+      <label for="eventTime">Time</label>
+      <input type="time" id="eventTime" required />
+
+      <label for="location">Location</label>
+      <input type="text" id="location" placeholder="Block 8 Auditorium, CU" required />
+
+      <label for="clubName">Club Name</label>
+      <input type="text" id="clubName" placeholder="e.g., Tech Society" required />
+
+      <button type="submit" class="btn">Submit & Pay ₹50</button>
+    </form>
+
+    <p class="note">Your event will be reviewed and shown in the Club Events Calendar upon approval.</p>
+  </div>
+<script src="script.js"></script>
+</body>
+</html>

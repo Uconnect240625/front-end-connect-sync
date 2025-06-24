@@ -1,0 +1,68 @@
+/* Post_Roommate_Request CSS goes here */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f2f5fc;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background-color: #ffffff;
+      padding: 1.8rem;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      font-weight: 600;
+      margin: 0.8rem 0 0.3rem;
+      display: block;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      outline: none;
+      transition: 0.2s border;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.95rem;
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: 0.5s ease;
+    }
+
+    button:hover {
+      background-color: #CF0004;
+    }
+
+    .note {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 1rem;
+    }

@@ -1,0 +1,73 @@
+<!-- Mess_Menu HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mess Menu | U Connect</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="mess-container">
+    <header>
+      <h2>🍽️ Mess Menu</h2>
+      <p>Check your weekly meal plan</p>
+    </header>
+
+    <div class="day-tabs">
+      <button class="day-btn active" onclick="switchDay('monday')">Mon</button>
+      <button class="day-btn" onclick="switchDay('tuesday')">Tue</button>
+      <button class="day-btn" onclick="switchDay('wednesday')">Wed</button>
+      <button class="day-btn" onclick="switchDay('thursday')">Thu</button>
+      <button class="day-btn" onclick="switchDay('friday')">Fri</button>
+      <button class="day-btn" onclick="switchDay('saturday')">Sat</button>
+      <button class="day-btn" onclick="switchDay('sunday')">Sun</button>
+    </div>
+
+    <!-- Monday Menu Example -->
+    <section class="menu-day active" id="monday">
+      <div class="meal-card">
+        <h3>🍳 Breakfast</h3>
+        <p>Aloo Paratha, Curd, Tea</p>
+      </div>
+      <div class="meal-card">
+        <h3>🍛 Lunch</h3>
+        <p>Rajma, Rice, Roti, Salad</p>
+      </div>
+      <div class="meal-card">
+        <h3>☕ Snacks</h3>
+        <p>Tea & Biscuits</p>
+      </div>
+      <div class="meal-card">
+        <h3>🍲 Dinner</h3>
+        <p>Paneer Butter Masala, Naan, Gulab Jamun</p>
+      </div>
+    </section>
+
+    <!-- Tuesday (copy and update meals) -->
+    <section class="menu-day" id="tuesday">
+      <div class="meal-card">
+        <h3>🍳 Breakfast</h3>
+        <p>Idli, Sambhar, Coconut Chutney</p>
+      </div>
+      <div class="meal-card">
+        <h3>🍛 Lunch</h3>
+        <p>Chole, Rice, Roti, Boondi Raita</p>
+      </div>
+      <div class="meal-card">
+        <h3>☕ Snacks</h3>
+        <p>Maggi, Tea</p>
+      </div>
+      <div class="meal-card">
+        <h3>🍲 Dinner</h3>
+        <p>Mix Veg, Jeera Rice, Chapati, Kheer</p>
+      </div>
+    </section>
+
+    <!-- Add more days as needed -->
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

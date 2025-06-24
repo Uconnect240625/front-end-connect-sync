@@ -1,0 +1,71 @@
+/* Student_Profile_Dropdown CSS goes here */
+   body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #D10003;
+      color: white;
+      padding: 15px 20px;
+    }
+
+    .top-bar h2 {
+      margin: 0;
+    }
+
+    .profile-area {
+      position: relative;
+    }
+
+    .profile-icon {
+      background-color: white;
+      color: #D10003;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 45px;
+      right: 0;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: none;
+      min-width: 160px;
+      z-index: 999;
+    }
+
+    .dropdown a {
+      display: block;
+      padding: 10px 15px;
+      text-decoration: none;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .dropdown a:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown a:hover {
+      background-color: #f7f7f7;
+      color: #d70000;
+    }
+
+    .show {
+      display: block;
+    }

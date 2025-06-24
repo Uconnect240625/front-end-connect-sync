@@ -1,0 +1,57 @@
+<!-- Announcements HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U Connect | Announcements</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="announcement-container">
+    <h2>📣 Announcements</h2>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('official')">🏛️ Official</button>
+      <button class="tab" onclick="showTab('student')">🎓 Student</button>
+    </div>
+
+    <!-- Official Announcements -->
+    <div id="official" class="tab-content active">
+      <div class="card">
+        <h3>Mid-Sem Exam Schedule Out</h3>
+        <span class="badge">Exams</span>
+        <p>Mid-semester exams will begin from 10th July. Check your department notice board for detailed datesheets.</p>
+        <span class="date">📅 June 17, 2025</span>
+      </div>
+
+      <div class="card">
+        <h3>Holiday on Guru Purnima</h3>
+        <span class="badge">Holiday</span>
+        <p>University will remain closed on 21st July in celebration of Guru Purnima.</p>
+        <span class="date">📅 June 15, 2025</span>
+      </div>
+    </div>
+
+    <!-- Student Announcements -->
+    <div id="student" class="tab-content">
+      <div class="card">
+        <h3>TEDxU Speaker Hunt 🎤</h3>
+        <span class="badge student">Club Event</span>
+        <p>Think you’ve got a story worth sharing? Apply to be a speaker for TEDxU 2025. Applications close July 5.</p>
+        <span class="date">📅 June 16, 2025</span>
+      </div>
+
+      <div class="card">
+        <h3>Found: AirPods in Block B</h3>
+        <span class="badge student">Lost & Found</span>
+        <p>If you’ve lost your AirPods near Block B stairs, contact Sahil (CSE 2nd Year) at 98xxxxxx23.</p>
+        <span class="date">📅 June 14, 2025</span>
+      </div>
+    </div>
+  </div>
+<script src="script.js"></script>
+</body>
+</html>

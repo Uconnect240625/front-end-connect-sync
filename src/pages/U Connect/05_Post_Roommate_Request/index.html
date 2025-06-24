@@ -1,0 +1,68 @@
+<!-- Post_Roommate_Request HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css">
+  <title>Post Roommate Request | U Connect</title>
+</head>
+<body>
+  <div class="container">
+    <h2>🙋 Post Roommate Request</h2>
+    <form>
+      <label for="name">Your Name</label>
+      <input type="text" id="name" placeholder="Kabir Sabharwal" required>
+
+      <label for="year">Your Year</label>
+      <select id="year" required>
+        <option value="">Select</option>
+        <option>1st Year</option>
+        <option>2nd Year</option>
+        <option>3rd Year</option>
+        <option>4th Year</option>
+      </select>
+
+      <label for="subject">Your Subject</label>
+      <select id="subject" required>
+        <option value="">Select Subject</option>
+        <option>Computer Science</option>
+        <option>Information Technology</option>
+        <option>Mechanical</option>
+        <option>Electrical</option>
+        <option>Electronics & Communication</option>
+        <option>Civil</option>
+        <option>Law</option>
+        <option>Management</option>
+        <option>Pharmacy</option>
+        <option>Architecture</option>
+        <option>Other</option>
+      </select>
+
+      <label for="gender">Gender</label>
+      <select id="gender" required>
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+
+      <label for="location">Preferred Location</label>
+      <input type="text" id="location" placeholder="e.g. Near Gate 1, Sector 25" required>
+
+      <label for="budget">Budget (₹)</label>
+      <input type="number" id="budget" placeholder="e.g. 6000" required>
+
+      <label for="desc">Additional Info</label>
+      <textarea id="desc" rows="4" placeholder="chill person, non-smoker, prefers 2-sharing, etc."></textarea>
+
+      <label for="contact">Contact Number</label>
+      <input type="tel" id="contact" placeholder="+91 XXXXXXXXXX" required>
+
+      <button type="submit">✅ Submit Request</button>
+    </form>
+    <p class="note">Your post will be visible in the Roommate tab once approved by the CUConnect team.</p>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

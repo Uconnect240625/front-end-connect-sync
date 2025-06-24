@@ -1,0 +1,87 @@
+/* CUConnect_Profile_Page CSS goes here */
+ body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    .profile-container {
+      max-width: 400px;
+      margin: 40px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      text-align: center;
+
+    }
+
+    .profile-pic {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+      border: 3px solid #d70000;
+    }
+
+    h2 {
+      margin: 5px 0;
+      font-size: 22px;
+    }
+
+    p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #777;
+    }
+
+    .btn {
+      display: block;
+      width: 200px;
+      padding: 12px 27px;
+      margin: 18px auto;
+      background-color: #d70000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #b00000;
+    }
+
+    .logout{
+      background-color: #020000cd;
+      width: 270px
+    }
+
+    .logout:hover{
+      background-color: #111;
+    }
+
+    .section-title {
+      margin-top: 30px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: left;
+      color: #444;
+    }
+
+    .card-list {
+      margin-top: 10px;
+    }
+
+    .card {
+      background: #f9f9f9;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      text-align: left;
+      font-size: 15px;
+    }
+

@@ -1,0 +1,77 @@
+/* Admin_Approval CSS goes here */
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: #f1f5fa;
+      padding: 1rem;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #222;
+    }
+
+    .listing {
+      background: #fff;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .listing h3 {
+      margin: 0 0 0.5rem;
+      color: #007bff;
+    }
+
+    .listing p {
+      margin: 0.3rem 0;
+      color: #444;
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 0.8rem;
+    }
+
+    .actions button {
+      flex: 1;
+      padding: 0.6rem;
+      font-weight: bold;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .approve {
+      background: #0083c0db;
+      color: white;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .approve:hover{
+      background: #0083C1;
+    }
+
+    .reject {
+      background: #dc3546e4;
+      color: white;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .reject:hover{
+      background: #dc3545;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      background: #e9efff;
+      padding: 3px 8px;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 5px;
+    }

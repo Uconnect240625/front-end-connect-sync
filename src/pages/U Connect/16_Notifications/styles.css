@@ -1,0 +1,67 @@
+/* Notifications CSS goes here */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f8f8;
+    }
+
+    .header {
+      background-color: #cf0a2c;
+      color: white;
+      padding: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .filter-bar {
+      display: flex;
+      overflow-x: auto;
+      padding: 10px;
+      background-color: #fff;
+      gap: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .filter {
+      background-color: #eee;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .filter.active {
+      background-color: #cf0a2c;
+      color: white;
+      font-weight: bold;
+    }
+
+    .notifications {
+      padding: 15px;
+    }
+
+    .notice {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .notice h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: #cf0a2c;
+    }
+
+    .notice p {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .notice .date {
+      font-size: 12px;
+      color: gray;
+      text-align: right;
+    }

@@ -1,0 +1,78 @@
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%;
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  background: #fff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Splash Container */
+.splash-container {
+  text-align: center;
+}
+
+/* Logo Styling */
+.logo {
+  margin-top: -20px;
+  width: 250px;
+  height: 200px;
+  margin-bottom: 20px;
+  animation: popIn 1s ease-out;
+  mix-blend-mode: multiply;
+}
+
+/* Title Styling */
+.title {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  animation: fadeSlideIn 1s ease forwards;
+}
+
+.r{
+  color: #D10003;
+}
+
+.b{
+  color: #0083C1;
+}
+
+/* Loading Text */
+.loading-text {
+  margin-top: -30px;
+  font-size: 1.2rem;
+  color: #94a3b8;
+}
+
+/* Animations */
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

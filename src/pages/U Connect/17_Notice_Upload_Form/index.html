@@ -1,0 +1,42 @@
+<!-- Notice_Upload_Form HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post Notice</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h2>Post a New Notice</h2>
+
+  <form id="noticeForm">
+    <div class="form-group">
+      <label for="title">Notice Title</label>
+      <input type="text" id="title" required />
+    </div>
+
+    <div class="form-group">
+      <label for="type">Notice Type</label>
+      <select id="type" required>
+        <option value="">Select Type</option>
+        <option value="Official">Official</option>
+        <option value="Clubs">Clubs</option>
+        <option value="Hostel">Hostel</option>
+        <option value="Academics">Academics</option>
+        <option value="Emergency">Emergency</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Draft a Notice</label>
+      <textarea id="description" required></textarea>
+    </div>
+
+    <button type="submit">Submit Notice</button>
+  </form>
+
+<script src="script.js"></script>
+</body>
+</html>

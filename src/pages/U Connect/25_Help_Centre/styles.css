@@ -1,0 +1,68 @@
+/* Help_Centre CSS goes here */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f7fa;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #e74c3c;
+  font-size: 28px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.form-row label {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="file"],
+textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.buttons {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.fab {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  background: #076edd;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.fab:hover {
+  background: #D10003;
+}

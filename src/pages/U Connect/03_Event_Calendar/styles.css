@@ -1,0 +1,118 @@
+/* Event_Calendar CSS goes here */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f4f6f9;
+  color: #2c3e50;
+  padding: 1.5rem;
+}
+
+.calendar-container {
+  max-width: 480px;
+  margin: auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 1.8rem;
+}
+
+header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+header p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #e0e0e0;
+  transition: 0.3s;
+}
+
+.tab-button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+.event-list {
+  display: none;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.event-list.active {
+  display: flex;
+}
+
+.event-card {
+  background: #ffffff;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.event-date {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #007bff;
+  width: 80px;
+  text-align: center;
+  border-right: 2px solid #eee;
+}
+
+.event-info {
+  flex: 1;
+}
+
+.event-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.event-info p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.4rem;
+}
+
+.event-info span {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: #CF0004;
+  color: white;
+  padding: 0.9rem 1.3rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  cursor: pointer;
+}

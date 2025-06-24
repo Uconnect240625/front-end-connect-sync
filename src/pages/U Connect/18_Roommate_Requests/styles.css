@@ -1,0 +1,61 @@
+/* Roommate_Requests CSS goes here */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h2 {
+      text-align: center;
+      color: #cf0a2c;
+      margin-bottom: 20px;
+    }
+
+    .listing-card {
+      background-color: white;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .listing-card h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .listing-card p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      background-color: #0083C1;
+      color: white;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      background-color: #cf0a2c;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      margin-top: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn:hover {
+      background-color: #a00821;
+    }
+
+    .verified {
+      background-color: #2ecc71;
+    }

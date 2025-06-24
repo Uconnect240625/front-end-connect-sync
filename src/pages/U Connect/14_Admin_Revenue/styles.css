@@ -1,0 +1,79 @@
+/* Admin_Revenue CSS goes here */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .dashboard {
+      max-width: 420px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #d70000;
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 24px;
+    }
+
+    .total-collected {
+      background: #d70000;
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .total-collected h3 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .total-collected p {
+      font-size: 30px;
+      font-weight: bold;
+      margin: 10px 0 0;
+    }
+
+    .earnings-breakdown {
+      margin-bottom: 25px;
+    }
+
+    .earnings-breakdown h4 {
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    .source {
+      background: #f0f0f0;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .withdraw-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: #d70000;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .withdraw-btn:hover {
+      background: #b80000;
+    }

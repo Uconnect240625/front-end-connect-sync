@@ -1,0 +1,46 @@
+<!-- Help_Centre HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Centre</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+  <h1>🚨 Help Centre</h1>
+
+  <div class="form-row">
+    <label for="studentName">👤 Student Name</label>
+    <input type="text" id="studentName" placeholder="Enter your name" />
+  </div>
+
+  <div class="form-row">
+    <label for="issueCategory">📂 Issue Category</label>
+    <input type="text" id="issueCategory" placeholder="e.g., Bug, UI, Suggestion" />
+  </div>
+
+  <div class="form-row">
+    <label for="issueTitle">📌 Issue Title</label>
+    <input type="text" id="issueTitle" placeholder="Short descriptive title" />
+  </div>
+
+  <div class="form-row">
+    <label for="description">📝 Description</label>
+    <textarea id="description" placeholder="Explain the issue in detail..."></textarea>
+  </div>
+
+  <div class="form-row">
+    <label for="screenshot">📎 Upload Screenshot</label>
+    <input type="file" id="screenshot" accept="image/*" />
+  </div>
+
+  <div class="form-row buttons">
+    <button id="submitIssueBtn" class="fab green">✅ Submit Issue</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

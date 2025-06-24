@@ -1,0 +1,63 @@
+/* List_Your_Product CSS goes here */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.main-heading {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.subheading {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.listing-form {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  text-align: left;
+}
+
+.listing-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.listing-form input,
+.listing-form select,
+.listing-form textarea {
+  margin-bottom: 15px;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.listing-form button {
+  background-color: #076edd;
+  color: white;
+  padding: 12px;
+  font-size: 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.listing-form button:hover {
+  background-color: #D10003;
+}

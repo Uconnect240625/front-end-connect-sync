@@ -1,0 +1,75 @@
+<!-- PG_Roommate_Finder HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css">
+  <title>U Connect | PG & Roommate</title>
+</head>
+<body>
+  <div class="pg-container">
+    <h2>🏡 PG & Roommate Finder</h2>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('pgs')">🛏️ PG Listings</button>
+      <button class="tab" onclick="showTab('roommates')">🙋 Roommates</button>
+      <button class="tab" onclick="showTab('add-pg')">📝 Post Your PG</button>
+    </div>
+
+    <div id="pgs" class="tab-content active">
+      <div class="card">
+        <h3>Shree Ganesh PG <span class="badge female">Girls</span> <span class="verify">✅ Verified</span></h3>
+        <p><strong>Rent:</strong> ₹7000/month</p>
+        <p><strong>Location:</strong> Gate 2, Sector 25</p>
+        <p><strong>Rating:</strong> ⭐⭐⭐⭐☆ (4.2)</p>
+        <div class="contact-btns">
+          <a href="tel:+919876543210">📞 Call</a>
+          <a href="https://wa.me/919876543210" target="_blank">💬 WhatsApp</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="roommates" class="tab-content">
+      <div class="card">
+        <h3>Aman | 2nd Year CSE <span class="badge male">Male</span></h3>
+        <p>Looking for a roommate near Gate 1. Prefer someone chill and responsible. Budget ₹6K. DM now!</p>
+        <div class="contact-btns">
+          <a href="tel:+919087654321">📞 Call</a>
+          <a href="https://wa.me/919087654321" target="_blank">💬 WhatsApp</a>
+        </div>
+        <span class="date">📅 Posted: June 17, 2025</span>
+      </div>
+    </div>
+
+    <div id="add-pg" class="tab-content">
+      <form>
+        <label for="pgName">PG Name</label>
+        <input type="text" id="pgName" placeholder="e.g. Shree Ganesh PG" required>
+
+        <label for="gender">Gender</label>
+        <select id="gender" required>
+          <option value="">Select</option>
+          <option value="boys">Boys</option>
+          <option value="girls">Girls</option>
+          <option value="coed">Co-ed</option>
+        </select>
+
+        <label for="rent">Rent (per month)</label>
+        <input type="number" id="rent" placeholder="e.g. 6000" required>
+
+        <label for="location">Location</label>
+        <input type="text" id="location" placeholder="e.g. Sector 25, Near Gate 2" required>
+
+        <label for="contact">Contact Number</label>
+        <input type="tel" id="contact" placeholder="+91 XXXXXXXXXX" required>
+
+        <label for="desc">Short Description</label>
+        <textarea id="desc" rows="4" placeholder="Wifi, food, AC, distance from CU, etc." required></textarea>
+
+        <button type="submit">✅ Submit PG</button>
+      </form>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

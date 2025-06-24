@@ -1,0 +1,43 @@
+<!-- Navigation_Bar HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U Connect Sidebar Nav</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <div class="top-bar">
+    <h2>U Connect</h2>
+    <i class="fas fa-bars hamburger" onclick="toggleSidebar()"></i>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <a href="#">🏠 Home</a>
+    <a href="#">📚 Notes Hub</a>
+    <a href="#">📅 Event Calendar</a>
+    <a href="#">🍽 Mess Menu</a>
+    <a href="#">🛒 Marketplace</a>
+    <a href="#">🏠 PG/Roommate Finder</a>
+    <a href="#">📢 Announcement Board</a>
+    <a href="#">🆘 Help Center</a>
+    <a href="#">⚙ Settings</a>
+    <a href="#">🚪 Logout</a>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Main Content -->
+  <div class="content">
+    <h3>Welcome to U Connect 👋</h3>
+    <p>This is your main page content.</p>
+  </div>
+<script src="script.js"></script>
+</body>
+</html>

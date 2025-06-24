@@ -1,0 +1,47 @@
+<!-- Upload_Notes HTML goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload Notes</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📤 Upload Notes</h1>
+
+    <div class="form-row">
+      <label for="studentName">👤 Student Name</label>
+      <input type="text" id="studentName" placeholder="Enter student name" />
+    </div>
+
+    <div class="form-row">
+      <label for="semester">🎓 Semester</label>
+      <input type="text" id="semester" placeholder="Semester (e.g., 4th)" />
+    </div>
+
+    <div class="form-row">
+      <label for="subject">📘 Subject</label>
+      <input type="text" id="subject" placeholder="Subject (e.g., DSA)" />
+    </div>
+
+    <div class="form-row">
+      <label for="notesFile">📎 Upload PDF</label>
+      <input type="file" id="notesFile" accept="application/pdf" />
+    </div>
+
+    <div class="form-row">
+      <label for="description">📝 Description</label>
+      <textarea id="description" placeholder="Write a brief description..."></textarea>
+    </div>
+
+    <div class="form-row buttons">
+      <button id="uploadNowBtn" class="fab green">✅ Upload Now</button>
+      <button id="backBtn" class="fab blue">← Back to Notes Hub</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
