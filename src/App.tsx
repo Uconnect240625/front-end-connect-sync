@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +26,9 @@ import AdminRevenue from "./pages/AdminRevenue";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import PostNotice from "./pages/PostNotice";
 import Settings from "./pages/Settings";
+import ProfilePage from "./pages/ProfilePage";
+import Notifications from "./pages/Notifications";
+import HelpCenterAdmin from "./pages/HelpCenterAdmin";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,16 @@ const App = () => (
             <Route path="/uconnect" element={
               <ProtectedRoute>
                 <UConnect />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             } />
             <Route path="/mess-menu" element={
@@ -84,7 +96,11 @@ const App = () => (
                 <HelpCenter />
               </ProtectedRoute>
             } />
-            {/* New routes for converted pages */}
+            <Route path="/help-admin" element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <HelpCenterAdmin />
+              </ProtectedRoute>
+            } />
             <Route path="/mess-menu-admin" element={
               <ProtectedRoute requiredRole={['admin']}>
                 <MessMenuAdmin />
