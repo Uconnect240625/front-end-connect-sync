@@ -1,9 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const isDark = localStorage.getItem('uconnectDarkMode') === 'true';
@@ -23,6 +28,18 @@ const Settings = () => {
       document.body.classList.remove('dark');
       localStorage.setItem('uconnectDarkMode', 'false');
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const handleEditProfile = () => {
+    navigate('/profile');
   };
 
   return (
@@ -46,7 +63,10 @@ const Settings = () => {
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-3 border-b cursor-pointer hover:bg-gray-50">
+            <div 
+              className="flex items-center justify-between p-3 border-b cursor-pointer hover:bg-gray-50"
+              onClick={handleEditProfile}
+            >
               <span className="font-medium">👤 Edit Profile</span>
               <span className="text-gray-400">›</span>
             </div>
@@ -72,9 +92,12 @@ const Settings = () => {
             </div>
           </div>
 
-          <button className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold mt-6 hover:bg-red-700 transition-colors">
+          <Button 
+            onClick={handleLogout}
+            className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold mt-6 hover:bg-red-700 transition-colors"
+          >
             Logout
-          </button>
+          </Button>
 
           <div className="text-center text-sm text-gray-500 mt-4">
             UConnect v1.0 • Crafted by Kabir 🔥
