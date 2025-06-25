@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
 import UConnect from "./pages/UConnect";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -40,15 +38,8 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+            <Route path="/" element={<Auth />} />
             <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/uconnect"
               element={
@@ -153,7 +144,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Redirect old upload-notes route to main notes page */}
             <Route
               path="/upload-notes"
               element={

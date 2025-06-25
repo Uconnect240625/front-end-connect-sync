@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,7 +30,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/uconnect');
     }
   }, [user, navigate]);
 
@@ -77,7 +76,7 @@ export default function Auth() {
           title: "Welcome back!",
           description: "You have been logged in successfully."
         });
-        navigate('/');
+        navigate('/uconnect');
       }
     } catch (err) {
       console.error('Login catch error:', err);
