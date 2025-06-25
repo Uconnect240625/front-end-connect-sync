@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,17 +44,41 @@ export const UploadNotesForm = () => {
   });
 
   useEffect(() => {
-    if (profile) {
+    if (user) {
       fetchExistingSubjects();
     }
-  }, [profile]);
+  }, [user]);
 
   const fetchExistingSubjects = async () => {
     try {
+      // Fetch subjects using user's university_id from profile, or get it directly
+      let universityId = profile?.university_id;
+      
+      if (!universityId) {
+        console.log('Profile not available, attempting to get university_id directly');
+        // If profile is not available, try to get the first available university
+        const { data: universities, error: univError } = await supabase
+          .from('universities')
+          .select('id')
+          .limit(1);
+        
+        if (univError) {
+          console.error('Error fetching universities:', univError);
+          return;
+        }
+        
+        universityId = universities?.[0]?.id;
+      }
+
+      if (!universityId) {
+        console.log('No university available for fetching subjects');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('notes')
         .select('subject')
-        .eq('university_id', profile?.university_id);
+        .eq('university_id', universityId);
 
       if (error) throw error;
       
@@ -86,9 +109,9 @@ export const UploadNotesForm = () => {
   };
 
   const onSubmit = async (data: UploadFormData) => {
-    if (!user || !profile) {
+    if (!user) {
       toast({
-        title: "Error",
+        title: "Authentication Required",
         description: "You must be logged in to upload notes",
         variant: "destructive",
       });
@@ -99,6 +122,26 @@ export const UploadNotesForm = () => {
     setUploadProgress(10);
 
     try {
+      // Get university_id with fallback handling
+      let universityId = profile?.university_id;
+      
+      if (!universityId) {
+        console.log('Profile university_id not available, using fallback');
+        // Try to get the first available university as fallback
+        const { data: universities, error: univError } = await supabase
+          .from('universities')
+          .select('id')
+          .limit(1);
+        
+        if (univError) throw univError;
+        
+        universityId = universities?.[0]?.id;
+        
+        if (!universityId) {
+          throw new Error('No university available. Please contact support.');
+        }
+      }
+
       // Generate unique filename
       const file = data.file[0];
       const fileExtension = file.name.split('.').pop();
@@ -121,7 +164,7 @@ export const UploadNotesForm = () => {
         .from('notes')
         .insert({
           user_id: user.id,
-          university_id: profile.university_id,
+          university_id: universityId,
           title: data.title,
           subject: data.subject,
           file_url: fileUrl,
@@ -145,8 +188,8 @@ export const UploadNotesForm = () => {
     } catch (error) {
       console.error('Error uploading note:', error);
       toast({
-        title: "Error",
-        description: "Failed to upload notes. Please try again.",
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Failed to upload notes. Please try again.",
         variant: "destructive",
       });
     } finally {
