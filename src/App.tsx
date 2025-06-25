@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import UConnect from "./pages/UConnect";
@@ -32,136 +32,205 @@ import HelpCenterAdmin from "./pages/HelpCenterAdmin";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <QueryClient client={queryClient}>
+      <AuthProvider>
+        <Router>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <UConnect />
-              </ProtectedRoute>
-            } />
-            <Route path="/uconnect" element={
-              <ProtectedRoute>
-                <UConnect />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/notifications" element={
-              <ProtectedRoute>
-                <Notifications />
-              </ProtectedRoute>
-            } />
-            <Route path="/mess-menu" element={
-              <ProtectedRoute>
-                <MessMenu />
-              </ProtectedRoute>
-            } />
-            <Route path="/notes" element={
-              <ProtectedRoute>
-                <NotesHub />
-              </ProtectedRoute>
-            } />
-            <Route path="/events" element={
-              <ProtectedRoute>
-                <EventCalendar />
-              </ProtectedRoute>
-            } />
-            <Route path="/marketplace" element={
-              <ProtectedRoute>
-                <Marketplace />
-              </ProtectedRoute>
-            } />
-            <Route path="/pg-finder" element={
-              <ProtectedRoute>
-                <PGFinder />
-              </ProtectedRoute>
-            } />
-            <Route path="/announcements" element={
-              <ProtectedRoute>
-                <Announcements />
-              </ProtectedRoute>
-            } />
-            <Route path="/help" element={
-              <ProtectedRoute>
-                <HelpCenter />
-              </ProtectedRoute>
-            } />
-            <Route path="/help-admin" element={
-              <ProtectedRoute requiredRole={['admin']}>
-                <HelpCenterAdmin />
-              </ProtectedRoute>
-            } />
-            <Route path="/mess-menu-admin" element={
-              <ProtectedRoute requiredRole={['admin']}>
-                <MessMenuAdmin />
-              </ProtectedRoute>
-            } />
-            <Route path="/post-club-event" element={
-              <ProtectedRoute>
-                <PostClubEvent />
-              </ProtectedRoute>
-            } />
-            <Route path="/club-dashboard" element={
-              <ProtectedRoute>
-                <ClubDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin-dashboard" element={
-              <ProtectedRoute requiredRole={['admin']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/post-roommate-request" element={
-              <ProtectedRoute>
-                <PostRoommateRequest />
-              </ProtectedRoute>
-            } />
-            <Route path="/list-product" element={
-              <ProtectedRoute>
-                <ListProduct />
-              </ProtectedRoute>
-            } />
-            <Route path="/upload-notes" element={
-              <ProtectedRoute>
-                <UploadNotes />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin-revenue" element={
-              <ProtectedRoute requiredRole={['admin']}>
-                <AdminRevenue />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin-analytics" element={
-              <ProtectedRoute requiredRole={['admin']}>
-                <AdminAnalytics />
-              </ProtectedRoute>
-            } />
-            <Route path="/post-notice" element={
-              <ProtectedRoute requiredRole={['admin']}>
-                <PostNotice />
-              </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/uconnect"
+              element={
+                <ProtectedRoute>
+                  <UConnect />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <ProtectedRoute>
+                  <AdminAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/revenue"
+              element={
+                <ProtectedRoute>
+                  <AdminRevenue />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/announcements"
+              element={
+                <ProtectedRoute>
+                  <Announcements />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/event-calendar"
+              element={
+                <ProtectedRoute>
+                  <EventCalendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help-center"
+              element={
+                <ProtectedRoute>
+                  <HelpCenter />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help-center-admin"
+              element={
+                <ProtectedRoute>
+                  <HelpCenterAdmin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/marketplace"
+              element={
+                <ProtectedRoute>
+                  <Marketplace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/list-product"
+              element={
+                <ProtectedRoute>
+                  <ListProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mess-menu"
+              element={
+                <ProtectedRoute>
+                  <MessMenu />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mess-menu-admin"
+              element={
+                <ProtectedRoute>
+                  <MessMenuAdmin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notes"
+              element={
+                <ProtectedRoute>
+                  <NotesHub />
+                </ProtectedRoute>
+              }
+            />
+            {/* Redirect old upload-notes route to main notes page */}
+            <Route
+              path="/upload-notes"
+              element={
+                <ProtectedRoute>
+                  <NotesHub />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <Notifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pg-finder"
+              element={
+                <ProtectedRoute>
+                  <PGFinder />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/post-club-event"
+              element={
+                <ProtectedRoute>
+                  <PostClubEvent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/post-notice"
+              element={
+                <ProtectedRoute>
+                  <PostNotice />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/post-roommate-request"
+              element={
+                <ProtectedRoute>
+                  <PostRoommateRequest />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/club-dashboard"
+              element={
+                <ProtectedRoute>
+                  <ClubDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+          <Toaster />
+        </Router>
+      </AuthProvider>
+    </QueryClient>
+  );
+}
 
 export default App;
