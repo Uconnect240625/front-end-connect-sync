@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,7 +30,7 @@ export const UploadNotesForm = () => {
   const [isCustomSubject, setIsCustomSubject] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<UploadFormData>({
@@ -45,10 +44,11 @@ export const UploadNotesForm = () => {
   });
 
   useEffect(() => {
-    if (profile) {
+    console.log('UploadNotesForm - Auth state:', { user: !!user, profile: !!profile, loading });
+    if (user && profile) {
       fetchExistingSubjects();
     }
-  }, [profile]);
+  }, [user, profile, loading]);
 
   const fetchExistingSubjects = async () => {
     try {
@@ -86,10 +86,21 @@ export const UploadNotesForm = () => {
   };
 
   const onSubmit = async (data: UploadFormData) => {
-    if (!user || !profile) {
+    console.log('Upload attempt - Auth state:', { user: !!user, profile: !!profile });
+    
+    if (!user) {
       toast({
-        title: "Error",
-        description: "You must be logged in to upload notes",
+        title: "Authentication Error",
+        description: "You must be logged in to upload notes. Please sign in and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!profile) {
+      toast({
+        title: "Profile Error", 
+        description: "Your profile could not be loaded. Please refresh the page and try again.",
         variant: "destructive",
       });
       return;
@@ -168,6 +179,40 @@ export const UploadNotesForm = () => {
   const handleCustomSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     form.setValue('subject', e.target.value);
   };
+
+  // Show loading state while auth is being determined
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Show auth error if user is not authenticated
+  if (!user) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-8">
+        <p className="text-red-600 mb-4">You must be logged in to upload notes.</p>
+        <Button onClick={() => window.location.href = '/auth'}>
+          Go to Login
+        </Button>
+      </div>
+    );
+  }
+
+  // Show profile error if profile is not loaded
+  if (!profile) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-8">
+        <p className="text-red-600 mb-4">Unable to load your profile. Please try refreshing the page.</p>
+        <Button onClick={() => window.location.reload()}>
+          Refresh Page
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
