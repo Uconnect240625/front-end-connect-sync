@@ -105,11 +105,17 @@ export default function Auth() {
     }
 
     try {
-      console.log('Attempting signup with data:', {
+      console.log('Attempting comprehensive signup with data:', {
         email: signupEmail,
         full_name: fullName,
         role,
         university_id: universityId
+      });
+
+      // Show progress feedback
+      toast({
+        title: "Creating Account...",
+        description: "Please wait while we set up your profile.",
       });
 
       const { error } = await signUp(signupEmail, signupPassword, {
@@ -119,13 +125,13 @@ export default function Auth() {
       });
       
       if (error) {
-        console.error('Signup error details:', error);
+        console.error('Comprehensive signup error details:', error);
         
         // Provide more specific error messages
         let errorMessage = error.message || "Failed to create account. Please try again.";
         
-        if (error.message?.includes('Database error')) {
-          errorMessage = "There was an issue creating your profile. Please check all fields and try again.";
+        if (error.message?.includes('Database error') || error.message?.includes('type') || error.message?.includes('user_role')) {
+          errorMessage = "There was a database issue creating your profile. Our team has been notified. Please try again in a few minutes.";
         } else if (error.message?.includes('already registered')) {
           errorMessage = "An account with this email already exists. Please try logging in instead.";
         } else if (error.message?.includes('invalid email')) {
@@ -140,7 +146,7 @@ export default function Auth() {
           variant: "destructive"
         });
       } else {
-        console.log('Signup successful');
+        console.log('Comprehensive signup successful');
         toast({
           title: "Account Created!",
           description: "Your account has been created successfully. You can now log in."
@@ -153,7 +159,7 @@ export default function Auth() {
         setUniversityId('');
       }
     } catch (err) {
-      console.error('Signup catch error:', err);
+      console.error('Signup comprehensive catch error:', err);
       toast({
         title: "Signup Failed",
         description: "An unexpected error occurred. Please try again.",
