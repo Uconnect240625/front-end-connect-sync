@@ -3,10 +3,21 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Heart, Calendar } from 'lucide-react';
+import { Download, Heart, Calendar, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface Note {
   id: string;
@@ -21,11 +32,13 @@ interface Note {
 
 interface NotesCardProps {
   note: Note;
+  currentUserId: string;
   onUpdate: () => void;
 }
 
-export const NotesCard: React.FC<NotesCardProps> = ({ note, onUpdate }) => {
+export const NotesCard: React.FC<NotesCardProps> = ({ note, currentUserId, onUpdate }) => {
   const { toast } = useToast();
+  const isOwner = note.user_id === currentUserId;
 
   const handleDownload = async () => {
     if (!note.file_url) {
@@ -39,11 +52,13 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onUpdate }) => {
 
     try {
       // Extract the file path from the full URL
-      const fileName = note.file_url.split('/').pop() || 'note.pdf';
+      const urlParts = note.file_url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      const filePath = `${note.user_id}/${fileName}`;
       
       const { data, error } = await supabase.storage
         .from('notes')
-        .download(fileName);
+        .download(filePath);
 
       if (error) throw error;
 
@@ -95,12 +110,61 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onUpdate }) => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      // First, delete the file from storage if it exists
+      if (note.file_url) {
+        const urlParts = note.file_url.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        const filePath = `${note.user_id}/${fileName}`;
+        
+        const { error: storageError } = await supabase.storage
+          .from('notes')
+          .remove([filePath]);
+
+        if (storageError) {
+          console.error('Error deleting file from storage:', storageError);
+          // Continue with database deletion even if file deletion fails
+        }
+      }
+
+      // Delete the note record from database
+      const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', note.id)
+        .eq('user_id', currentUserId); // Extra security check
+
+      if (error) throw error;
+      
+      onUpdate();
+      toast({
+        title: "Success",
+        description: "Note deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete note",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg line-clamp-2">{note.title}</CardTitle>
-          <Badge variant="secondary">{note.subject}</Badge>
+          <div className="flex flex-col gap-1">
+            <Badge variant="secondary">{note.subject}</Badge>
+            {isOwner && (
+              <Badge variant="outline" className="text-xs">
+                Your note
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       
@@ -131,17 +195,48 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, onUpdate }) => {
             {note.likes_count}
           </Button>
           
-          {note.file_url && (
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={handleDownload}
-              className="flex items-center gap-1"
-            >
-              <Download size={14} />
-              Download
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {note.file_url && (
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={handleDownload}
+                className="flex items-center gap-1"
+              >
+                <Download size={14} />
+                Download
+              </Button>
+            )}
+            
+            {isOwner && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 size={14} />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Note</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete "{note.title}"? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

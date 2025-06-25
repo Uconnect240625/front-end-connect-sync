@@ -29,18 +29,42 @@ export const BrowseNotes = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user && profile) {
+    if (user) {
       fetchNotes();
       fetchSubjects();
     }
-  }, [user, profile]);
+  }, [user]);
 
   const fetchNotes = async () => {
     try {
+      // Get university_id with fallback handling
+      let universityId = profile?.university_id;
+      
+      if (!universityId) {
+        console.log('Profile not available, attempting to get university_id directly');
+        // If profile is not available, try to get the first available university
+        const { data: universities, error: univError } = await supabase
+          .from('universities')
+          .select('id')
+          .limit(1);
+        
+        if (univError) {
+          console.error('Error fetching universities:', univError);
+          return;
+        }
+        
+        universityId = universities?.[0]?.id;
+      }
+
+      if (!universityId) {
+        console.log('No university available for fetching notes');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('notes')
         .select('*')
-        .eq('university_id', profile?.university_id)
+        .eq('university_id', universityId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -59,10 +83,33 @@ export const BrowseNotes = () => {
 
   const fetchSubjects = async () => {
     try {
+      // Get university_id with fallback handling
+      let universityId = profile?.university_id;
+      
+      if (!universityId) {
+        console.log('Profile not available for subjects, attempting to get university_id directly');
+        const { data: universities, error: univError } = await supabase
+          .from('universities')
+          .select('id')
+          .limit(1);
+        
+        if (univError) {
+          console.error('Error fetching universities:', univError);
+          return;
+        }
+        
+        universityId = universities?.[0]?.id;
+      }
+
+      if (!universityId) {
+        console.log('No university available for fetching subjects');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('notes')
         .select('subject')
-        .eq('university_id', profile?.university_id);
+        .eq('university_id', universityId);
 
       if (error) throw error;
       
@@ -122,7 +169,12 @@ export const BrowseNotes = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredNotes.map(note => (
-            <NotesCard key={note.id} note={note} onUpdate={fetchNotes} />
+            <NotesCard 
+              key={note.id} 
+              note={note} 
+              currentUserId={user?.id || ''} 
+              onUpdate={fetchNotes} 
+            />
           ))}
         </div>
       )}
