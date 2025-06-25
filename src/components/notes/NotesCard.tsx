@@ -153,14 +153,18 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, currentUserId, onUpd
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg line-clamp-2">{note.title}</CardTitle>
-          <div className="flex flex-col gap-1">
-            <Badge variant="secondary">{note.subject}</Badge>
+    <Card className="hover:shadow-lg transition-all duration-300 w-full max-w-md mx-auto">
+      <CardHeader className="pb-4 space-y-3">
+        <div className="flex justify-between items-start gap-4">
+          <CardTitle className="text-xl font-semibold leading-tight flex-1 min-h-[3rem] flex items-center">
+            {note.title}
+          </CardTitle>
+          <div className="flex flex-col gap-2 shrink-0">
+            <Badge variant="secondary" className="text-sm px-3 py-1">
+              {note.subject}
+            </Badge>
             {isOwner && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs px-2 py-1">
                 Your note
               </Badge>
             )}
@@ -168,42 +172,45 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, currentUserId, onUpd
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Calendar size={14} />
-          {format(new Date(note.created_at), 'MMM d, yyyy')}
+      <CardContent className="space-y-6 pt-2">
+        <div className="flex items-center gap-3 text-sm text-gray-600">
+          <Calendar size={16} />
+          <span>{format(new Date(note.created_at), 'MMM d, yyyy')}</span>
         </div>
 
         {note.tags && note.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {note.tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-700">Tags:</p>
+            <div className="flex flex-wrap gap-2">
+              {note.tags.map((tag, index) => (
+                <Badge key={index} variant="outline" className="text-xs px-2 py-1">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-2">
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handleLike}
-            className="flex items-center gap-1"
+            className="flex items-center gap-2 px-4 py-2"
           >
-            <Heart size={14} />
-            {note.likes_count}
+            <Heart size={16} />
+            <span>{note.likes_count}</span>
           </Button>
           
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             {note.file_url && (
               <Button 
                 variant="default" 
                 size="sm" 
                 onClick={handleDownload}
-                className="flex items-center gap-1"
+                className="flex items-center gap-2 px-4 py-2"
               >
-                <Download size={14} />
+                <Download size={16} />
                 Download
               </Button>
             )}
@@ -214,9 +221,9 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, currentUserId, onUpd
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={16} />
                     Delete
                   </Button>
                 </AlertDialogTrigger>
