@@ -28,7 +28,7 @@ type UploadFormData = z.infer<typeof uploadFormSchema>;
 
 export const UploadNotesForm = () => {
   const [existingSubjects, setExistingSubjects] = useState<string[]>([]);
-  const [customSubject, setCustomSubject] = useState('');
+  const [isCustomSubject, setIsCustomSubject] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { user, profile } = useAuth();
@@ -123,7 +123,7 @@ export const UploadNotesForm = () => {
           user_id: user.id,
           university_id: profile.university_id,
           title: data.title,
-          subject: data.subject || customSubject,
+          subject: data.subject,
           file_url: fileUrl,
           tags: tags,
         });
@@ -139,7 +139,7 @@ export const UploadNotesForm = () => {
 
       // Reset form
       form.reset();
-      setCustomSubject('');
+      setIsCustomSubject(false);
       fetchExistingSubjects();
 
     } catch (error) {
@@ -157,11 +157,16 @@ export const UploadNotesForm = () => {
 
   const handleSubjectChange = (value: string) => {
     if (value === 'custom') {
+      setIsCustomSubject(true);
       form.setValue('subject', '');
     } else {
+      setIsCustomSubject(false);
       form.setValue('subject', value);
-      setCustomSubject('');
     }
+  };
+
+  const handleCustomSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setValue('subject', e.target.value);
   };
 
   return (
@@ -190,29 +195,39 @@ export const UploadNotesForm = () => {
                 <FormLabel>Subject</FormLabel>
                 <FormControl>
                   <div className="space-y-2">
-                    <Select onValueChange={handleSubjectChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select or add a subject" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {existingSubjects.map(subject => (
-                          <SelectItem key={subject} value={subject}>
-                            {subject}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="custom">+ Add new subject</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    {(field.value === '' || customSubject) && (
-                      <Input
-                        placeholder="Enter new subject"
-                        value={customSubject}
-                        onChange={(e) => {
-                          setCustomSubject(e.target.value);
-                          field.onChange(e.target.value);
-                        }}
-                      />
+                    {!isCustomSubject ? (
+                      <Select onValueChange={handleSubjectChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select or add a subject" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {existingSubjects.map(subject => (
+                            <SelectItem key={subject} value={subject}>
+                              {subject}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="custom">+ Add new subject</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Enter new subject"
+                          value={field.value}
+                          onChange={handleCustomSubjectChange}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setIsCustomSubject(false);
+                            form.setValue('subject', '');
+                          }}
+                        >
+                          Choose from existing subjects
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </FormControl>
