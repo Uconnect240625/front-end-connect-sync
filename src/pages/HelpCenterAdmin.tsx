@@ -37,18 +37,36 @@ const HelpCenterAdmin = () => {
 
       if (error) throw error;
       
-      // Map the data to ensure priority field is present with default value
-      const complaintsWithPriority = (data || []).map(complaint => ({
+      // Map the data to ensure proper status mapping and provide default priority
+      const mappedComplaints = (data || []).map(complaint => ({
         ...complaint,
-        priority: complaint.priority || 'medium' // Provide default value if missing
+        priority: complaint.priority || 'medium',
+        // Map database status values to our TypeScript enum
+        status: mapDatabaseStatusToComplaintStatus(complaint.status as string)
       }));
       
-      setComplaints(complaintsWithPriority);
+      setComplaints(mappedComplaints);
     } catch (error) {
       console.error('Error loading complaints:', error);
       toast.error('Failed to load complaints');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to map database status to our TypeScript enum
+  const mapDatabaseStatusToComplaintStatus = (dbStatus: string): Complaint['status'] => {
+    switch (dbStatus) {
+      case 'open':
+      case 'pending':
+        return 'pending';
+      case 'in_progress':
+        return 'in_progress';
+      case 'closed':
+      case 'resolved':
+        return 'resolved';
+      default:
+        return 'pending';
     }
   };
 
@@ -87,3 +105,4 @@ const HelpCenterAdmin = () => {
 };
 
 export default HelpCenterAdmin;
+

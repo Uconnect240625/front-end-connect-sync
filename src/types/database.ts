@@ -1,4 +1,5 @@
 
+
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
 export type ComplaintStatus = 'pending' | 'in_progress' | 'resolved';
 
@@ -75,3 +76,4 @@ export interface Complaint {
   created_at: string;
   updated_at: string;
 }
+
