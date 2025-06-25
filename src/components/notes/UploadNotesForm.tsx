@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,24 +46,37 @@ export const UploadNotesForm = () => {
 
   useEffect(() => {
     console.log('UploadNotesForm - Auth state:', { user: !!user, profile: !!profile, loading });
-    if (user && profile) {
+    
+    // Only fetch subjects if we have both user and profile
+    if (user && profile && profile.university_id) {
+      console.log('Fetching subjects for university:', profile.university_id);
       fetchExistingSubjects();
     }
   }, [user, profile, loading]);
 
   const fetchExistingSubjects = async () => {
+    if (!profile?.university_id) {
+      console.log('No university_id in profile, skipping subject fetch');
+      return;
+    }
+
     try {
+      console.log('Fetching subjects for university:', profile.university_id);
       const { data, error } = await supabase
         .from('notes')
         .select('subject')
-        .eq('university_id', profile?.university_id);
+        .eq('university_id', profile.university_id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching subjects:', error);
+        return;
+      }
       
       const subjects = [...new Set(data?.map(note => note.subject) || [])];
+      console.log('Fetched subjects:', subjects);
       setExistingSubjects(subjects);
     } catch (error) {
-      console.error('Error fetching subjects:', error);
+      console.error('Error in fetchExistingSubjects:', error);
     }
   };
 
@@ -86,7 +100,11 @@ export const UploadNotesForm = () => {
   };
 
   const onSubmit = async (data: UploadFormData) => {
-    console.log('Upload attempt - Auth state:', { user: !!user, profile: !!profile });
+    console.log('Upload attempt - Auth state:', { 
+      user: !!user, 
+      profile: !!profile, 
+      university_id: profile?.university_id 
+    });
     
     if (!user) {
       toast({
@@ -97,10 +115,10 @@ export const UploadNotesForm = () => {
       return;
     }
 
-    if (!profile) {
+    if (!profile || !profile.university_id) {
       toast({
         title: "Profile Error", 
-        description: "Your profile could not be loaded. Please refresh the page and try again.",
+        description: "Your profile could not be loaded or is missing university information. Please refresh the page and try again.",
         variant: "destructive",
       });
       return;
@@ -127,6 +145,15 @@ export const UploadNotesForm = () => {
         data.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : 
         null;
 
+      console.log('Inserting note with data:', {
+        user_id: user.id,
+        university_id: profile.university_id,
+        title: data.title,
+        subject: data.subject,
+        file_url: fileUrl,
+        tags: tags,
+      });
+
       // Save note metadata to database
       const { error: dbError } = await supabase
         .from('notes')
@@ -139,7 +166,10 @@ export const UploadNotesForm = () => {
           tags: tags,
         });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw dbError;
+      }
 
       setUploadProgress(100);
 
@@ -157,7 +187,7 @@ export const UploadNotesForm = () => {
       console.error('Error uploading note:', error);
       toast({
         title: "Error",
-        description: "Failed to upload notes. Please try again.",
+        description: `Failed to upload notes: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -207,6 +237,18 @@ export const UploadNotesForm = () => {
     return (
       <div className="max-w-2xl mx-auto text-center py-8">
         <p className="text-red-600 mb-4">Unable to load your profile. Please try refreshing the page.</p>
+        <Button onClick={() => window.location.reload()}>
+          Refresh Page
+        </Button>
+      </div>
+    );
+  }
+
+  // Show university error if profile doesn't have university_id
+  if (!profile.university_id) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-8">
+        <p className="text-red-600 mb-4">Your profile is missing university information. Please contact support.</p>
         <Button onClick={() => window.location.reload()}>
           Refresh Page
         </Button>
