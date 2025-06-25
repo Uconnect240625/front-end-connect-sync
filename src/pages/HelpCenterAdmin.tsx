@@ -40,7 +40,7 @@ const HelpCenterAdmin = () => {
       // Map the data to ensure proper status mapping and provide default priority
       const mappedComplaints = (data || []).map(complaint => ({
         ...complaint,
-        priority: complaint.priority || 'medium',
+        priority: 'medium' as const, // Always set default since priority doesn't exist in DB
         // Map database status values to our TypeScript enum
         status: mapDatabaseStatusToComplaintStatus(complaint.status as string)
       }));
@@ -105,4 +105,3 @@ const HelpCenterAdmin = () => {
 };
 
 export default HelpCenterAdmin;
-
