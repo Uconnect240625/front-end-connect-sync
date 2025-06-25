@@ -1,32 +1,119 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Utensils, ArrowLeft, Calendar } from 'lucide-react';
+
+interface MenuData {
+  [key: string]: {
+    [mealType: string]: string;
+  };
+}
 
 const MessMenu = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeDay, setActiveDay] = useState('monday');
+  const [menuData, setMenuData] = useState<MenuData>({});
+  const [loading, setLoading] = useState(true);
+
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dayNumbers = [1, 2, 3, 4, 5, 6, 0]; // Sunday is 0 in our database
+
+  useEffect(() => {
+    fetchMenuData();
+  }, []);
+
+  const fetchMenuData = async () => {
+    try {
+      setLoading(true);
+      
+      // Get current week's Monday
+      const today = new Date();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - today.getDay() + 1);
+      const weekStart = monday.toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from('mess_menus')
+        .select('day_of_week, meal_type, items')
+        .eq('week_start_date', weekStart)
+        .order('day_of_week')
+        .order('meal_type');
+
+      if (error) {
+        console.error('Error fetching menu data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch mess menu data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Transform the data to match our component structure
+      const transformedData: MenuData = {};
+      
+      data?.forEach((item) => {
+        const dayName = getDayName(item.day_of_week);
+        if (!transformedData[dayName]) {
+          transformedData[dayName] = {};
+        }
+        transformedData[dayName][item.meal_type.toLowerCase()] = item.items;
+      });
+
+      setMenuData(transformedData);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDayName = (dayNumber: number): string => {
+    const dayMap = {
+      0: 'sunday',
+      1: 'monday',
+      2: 'tuesday',
+      3: 'wednesday',
+      4: 'thursday',
+      5: 'friday',
+      6: 'saturday'
+    };
+    return dayMap[dayNumber as keyof typeof dayMap] || 'monday';
+  };
 
   const switchDay = (dayId: string) => {
     setActiveDay(dayId);
   };
 
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  const menuData = {
-    monday: {
-      breakfast: 'Aloo Paratha, Curd, Tea',
-      lunch: 'Rajma, Rice, Roti, Salad',
-      snacks: 'Tea & Biscuits',
-      dinner: 'Paneer Butter Masala, Naan, Gulab Jamun'
-    },
-    tuesday: {
-      breakfast: 'Idli, Sambhar, Coconut Chutney',
-      lunch: 'Chole, Rice, Roti, Boondi Raita',
-      snacks: 'Maggi, Tea',
-      dinner: 'Mix Veg, Jeera Rice, Chapati, Kheer'
+  const getMealIcon = (mealType: string) => {
+    switch (mealType) {
+      case 'breakfast': return '🍳';
+      case 'lunch': return '🍛';
+      case 'snacks': return '☕';
+      case 'dinner': return '🍲';
+      default: return '🍽️';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading mess menu...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -34,21 +121,29 @@ const MessMenu = () => {
         <header className="text-center mb-6">
           <button 
             onClick={() => navigate('/uconnect')}
-            className="mb-4 text-blue-600 hover:text-blue-800"
+            className="mb-4 flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
           >
-            ← Back to U Connect
+            <ArrowLeft size={20} />
+            Back to U Connect
           </button>
-          <h2 className="text-2xl font-semibold">🍽️ Mess Menu</h2>
-          <p className="text-gray-600">Check your weekly meal plan</p>
+          
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Utensils className="text-red-600" size={28} />
+            <h2 className="text-2xl font-semibold text-gray-800">Mess Menu</h2>
+          </div>
+          <p className="text-gray-600 flex items-center justify-center gap-1">
+            <Calendar size={16} />
+            Check your weekly meal plan
+          </p>
         </header>
 
-        <div className="flex justify-between mb-6 overflow-x-auto gap-2">
+        <div className="flex justify-between mb-6 overflow-x-auto gap-2 pb-2">
           {days.map((day, index) => (
             <button
               key={day}
-              className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                 activeDay === day
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-red-600 text-white shadow-lg'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
               onClick={() => switchDay(day)}
@@ -59,24 +154,29 @@ const MessMenu = () => {
         </div>
 
         <div className="space-y-4">
-          {menuData[activeDay as keyof typeof menuData] ? (
-            Object.entries(menuData[activeDay as keyof typeof menuData]).map(([meal, items]) => (
-              <div key={meal} className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="font-semibold text-red-600 mb-2 capitalize">
-                  {meal === 'breakfast' && '🍳'} 
-                  {meal === 'lunch' && '🍛'} 
-                  {meal === 'snacks' && '☕'} 
-                  {meal === 'dinner' && '🍲'} 
+          {menuData[activeDay] ? (
+            Object.entries(menuData[activeDay]).map(([meal, items]) => (
+              <div key={meal} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <h3 className="font-semibold text-red-600 mb-2 capitalize flex items-center gap-2">
+                  <span className="text-lg">{getMealIcon(meal)}</span>
                   {meal}
                 </h3>
-                <p className="text-gray-600">{items}</p>
+                <p className="text-gray-700 leading-relaxed">{items}</p>
               </div>
             ))
           ) : (
-            <div className="bg-white rounded-xl p-4 shadow-sm text-center text-gray-500">
-              Menu for {activeDay} coming soon!
+            <div className="bg-white rounded-xl p-8 shadow-sm text-center border border-gray-100">
+              <div className="text-4xl mb-3">🍽️</div>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">No Menu Available</h3>
+              <p className="text-gray-500">Menu for {activeDay} will be updated soon!</p>
             </div>
           )}
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            Menu updates weekly • Last updated: {new Date().toLocaleDateString()}
+          </p>
         </div>
       </div>
     </div>
