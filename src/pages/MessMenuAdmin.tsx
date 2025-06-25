@@ -13,19 +13,20 @@ const MessMenuAdmin = () => {
   const [meal, setMeal] = useState('Breakfast');
   const [items, setItems] = useState('');
   const [loading, setLoading] = useState(false);
+  const [universityId, setUniversityId] = useState<string | null>(null);
 
-  // Check if user is admin
+  // Check if user is admin and get university_id
   useEffect(() => {
     if (user) {
-      checkAdminStatus();
+      checkAdminStatusAndGetUniversity();
     }
   }, [user]);
 
-  const checkAdminStatus = async () => {
+  const checkAdminStatusAndGetUniversity = async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, university_id')
         .eq('id', user?.id)
         .single();
 
@@ -37,7 +38,10 @@ const MessMenuAdmin = () => {
         });
         // Redirect to main page
         window.location.href = '/uconnect';
+        return;
       }
+
+      setUniversityId(data.university_id);
     } catch (error) {
       console.error('Error checking admin status:', error);
     }
@@ -66,6 +70,15 @@ const MessMenuAdmin = () => {
       return;
     }
 
+    if (!universityId) {
+      toast({
+        title: "Error",
+        description: "University information not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // Get current week's Monday
@@ -83,6 +96,7 @@ const MessMenuAdmin = () => {
         .eq('day_of_week', dayNumber)
         .eq('meal_type', meal)
         .eq('week_start_date', weekStart)
+        .eq('university_id', universityId)
         .maybeSingle();
 
       if (fetchError) {
@@ -108,7 +122,8 @@ const MessMenuAdmin = () => {
             day_of_week: dayNumber,
             meal_type: meal,
             items: items.trim(),
-            week_start_date: weekStart
+            week_start_date: weekStart,
+            university_id: universityId
           });
         error = insertError;
       }
@@ -205,7 +220,7 @@ const MessMenuAdmin = () => {
 
           <button 
             onClick={saveMenu}
-            disabled={loading}
+            disabled={loading || !universityId}
             className="w-full bg-red-600 text-white py-3 rounded-md font-bold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? (
