@@ -1,82 +1,145 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import Navigation from '@/components/Navigation';
+import AdminStats from '@/components/admin/AdminStats';
+import ApprovalQueue from '@/components/admin/ApprovalQueue';
+import ComplaintsManager from '@/components/admin/ComplaintsManager';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const AdminDashboard = () => {
-  const handleApprove = (item: string) => {
-    alert(`✅ ${item} approved!`);
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    pendingApprovals: 0,
+    totalRevenue: 0,
+    activeUsers: 0,
+    pendingComplaints: 0
+  });
+  const [approvalItems, setApprovalItems] = useState([]);
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!profile) return;
+    
+    if (profile.role !== 'admin') {
+      toast.error('Access denied. Admin privileges required.');
+      navigate('/');
+      return;
+    }
+
+    loadDashboardData();
+  }, [profile, navigate]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load pending approvals from all tables
+      const [pgListings, marketplaceItems, clubEvents, complaintsData] = await Promise.all([
+        supabase
+          .from('pg_listings')
+          .select('*')
+          .eq('university_id', profile?.university_id)
+          .eq('approval_status', 'pending'),
+        
+        supabase
+          .from('marketplace_items')
+          .select('*')
+          .eq('university_id', profile?.university_id)
+          .eq('approval_status', 'pending'),
+        
+        supabase
+          .from('club_events')
+          .select('*')
+          .eq('university_id', profile?.university_id)
+          .eq('approval_status', 'pending'),
+        
+        supabase
+          .from('complaints')
+          .select('*')
+          .eq('university_id', profile?.university_id)
+          .neq('status', 'resolved')
+      ]);
+
+      // Combine approval items
+      const allApprovalItems = [
+        ...(pgListings.data || []).map(item => ({
+          ...item,
+          type: 'pg_listing' as const
+        })),
+        ...(marketplaceItems.data || []).map(item => ({
+          ...item,
+          type: 'marketplace_item' as const
+        })),
+        ...(clubEvents.data || []).map(item => ({
+          ...item,
+          type: 'club_event' as const
+        }))
+      ];
+
+      setApprovalItems(allApprovalItems);
+      setComplaints(complaintsData.data || []);
+
+      // Calculate stats
+      const paidItems = allApprovalItems.filter(item => item.payment_status === 'paid');
+      const totalRevenue = paidItems.length * 50; // Assuming ₹50 per paid item
+
+      setStats({
+        pendingApprovals: allApprovalItems.length,
+        totalRevenue,
+        activeUsers: 0, // This would need a separate query
+        pendingComplaints: complaintsData.data?.length || 0
+      });
+
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReject = (item: string) => {
-    alert(`❌ ${item} rejected!`);
-  };
+  if (!profile || profile.role !== 'admin') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-2xl mx-auto pt-20 px-4">
-        <h2 className="text-center text-2xl font-bold mb-6 text-gray-800">
-          🔐 Admin Dashboard
-        </h2>
-
-        {/* Sample Roommate Request */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-          <h3 className="text-lg font-semibold text-blue-600 mb-2">
-            Kabir Sabharwal <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Roommate</span>
-          </h3>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p><strong>Year:</strong> 1st Year</p>
-            <p><strong>Subject:</strong> Computer Science</p>
-            <p><strong>Gender:</strong> Male</p>
-            <p><strong>Budget:</strong> ₹6000</p>
-            <p><strong>Location:</strong> Near Gate 1</p>
-            <p><strong>Contact:</strong> +91 XXXXXXXX29</p>
-            <p><strong>Note:</strong> Non-smoker, prefers 2-sharing.</p>
-          </div>
-          <div className="flex gap-2 mt-3">
-            <button 
-              onClick={() => handleApprove('Kabir\'s roommate request')}
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-            >
-              ✅ Approve
-            </button>
-            <button 
-              onClick={() => handleReject('Kabir\'s roommate request')}
-              className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700"
-            >
-              ❌ Reject
-            </button>
-          </div>
+      
+      <div className="max-w-7xl mx-auto pt-8 px-4">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+          <p className="text-gray-600">Manage university operations and approvals</p>
         </div>
 
-        {/* Sample PG Listing */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-blue-600 mb-2">
-            Lovely PG <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">PG</span>
-          </h3>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p><strong>Owner:</strong> Rajan Mehta</p>
-            <p><strong>Location:</strong> Sector 125</p>
-            <p><strong>Price:</strong> ₹7000</p>
-            <p><strong>Type:</strong> 2 Sharing</p>
-            <p><strong>Facilities:</strong> AC, WiFi, Meals</p>
-            <p><strong>Contact:</strong> +91 XXXXXXXX42</p>
-          </div>
-          <div className="flex gap-2 mt-3">
-            <button 
-              onClick={() => handleApprove('Lovely PG listing')}
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-            >
-              ✅ Approve
-            </button>
-            <button 
-              onClick={() => handleReject('Lovely PG listing')}
-              className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700"
-            >
-              ❌ Reject
-            </button>
-          </div>
-        </div>
+        <AdminStats stats={stats} />
+
+        <Tabs defaultValue="approvals" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
+            <TabsTrigger value="complaints">Complaints</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="approvals">
+            <ApprovalQueue 
+              items={approvalItems} 
+              onApprovalChange={loadDashboardData}
+            />
+          </TabsContent>
+
+          <TabsContent value="complaints">
+            <ComplaintsManager 
+              complaints={complaints} 
+              onComplaintUpdate={loadDashboardData}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
