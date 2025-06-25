@@ -5,8 +5,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { NotesCard } from './NotesCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText, Heart, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Note {
   id: string;
@@ -19,104 +20,54 @@ interface Note {
   user_id: string;
 }
 
-export const BrowseNotes = () => {
+interface Stats {
+  totalNotes: number;
+  totalLikes: number;
+  subjects: string[];
+}
+
+export const MyNotes = () => {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [subjects, setSubjects] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const [stats, setStats] = useState<Stats>({ totalNotes: 0, totalLikes: 0, subjects: [] });
+  const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
-      fetchNotes();
-      fetchSubjects();
+      fetchMyNotes();
     }
   }, [user]);
 
-  const fetchNotes = async () => {
+  const fetchMyNotes = async () => {
     try {
-      // Get university_id with fallback handling
-      let universityId = profile?.university_id;
-      
-      if (!universityId) {
-        console.log('Profile not available, attempting to get university_id directly');
-        // If profile is not available, try to get the first available university
-        const { data: universities, error: univError } = await supabase
-          .from('universities')
-          .select('id')
-          .limit(1);
-        
-        if (univError) {
-          console.error('Error fetching universities:', univError);
-          return;
-        }
-        
-        universityId = universities?.[0]?.id;
-      }
-
-      if (!universityId) {
-        console.log('No university available for fetching notes');
-        return;
-      }
-
       const { data, error } = await supabase
         .from('notes')
         .select('*')
-        .eq('university_id', universityId)
+        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      
       setNotes(data || []);
+      
+      // Calculate stats
+      const totalNotes = data?.length || 0;
+      const totalLikes = data?.reduce((sum, note) => sum + (note.likes_count || 0), 0) || 0;
+      const subjects = [...new Set(data?.map(note => note.subject) || [])];
+      
+      setStats({ totalNotes, totalLikes, subjects });
     } catch (error) {
-      console.error('Error fetching notes:', error);
+      console.error('Error fetching my notes:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch notes",
+        description: "Failed to fetch your notes",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchSubjects = async () => {
-    try {
-      // Get university_id with fallback handling
-      let universityId = profile?.university_id;
-      
-      if (!universityId) {
-        console.log('Profile not available for subjects, attempting to get university_id directly');
-        const { data: universities, error: univError } = await supabase
-          .from('universities')
-          .select('id')
-          .limit(1);
-        
-        if (univError) {
-          console.error('Error fetching universities:', univError);
-          return;
-        }
-        
-        universityId = universities?.[0]?.id;
-      }
-
-      if (!universityId) {
-        console.log('No university available for fetching subjects');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('notes')
-        .select('subject')
-        .eq('university_id', universityId);
-
-      if (error) throw error;
-      
-      const uniqueSubjects = [...new Set(data?.map(note => note.subject) || [])];
-      setSubjects(uniqueSubjects);
-    } catch (error) {
-      console.error('Error fetching subjects:', error);
     }
   };
 
@@ -137,12 +88,46 @@ export const BrowseNotes = () => {
 
   return (
     <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Notes</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalNotes}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Likes</CardTitle>
+            <Heart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalLikes}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Subjects</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.subjects.length}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="🔍 Search notes..."
+          placeholder="🔍 Search your notes..."
           className="flex-1"
         />
         <Select value={selectedSubject} onValueChange={setSelectedSubject}>
@@ -151,7 +136,7 @@ export const BrowseNotes = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Subjects</SelectItem>
-            {subjects.map(subject => (
+            {stats.subjects.map(subject => (
               <SelectItem key={subject} value={subject}>
                 {subject}
               </SelectItem>
@@ -160,10 +145,11 @@ export const BrowseNotes = () => {
         </Select>
       </div>
 
+      {/* Notes Grid */}
       {filteredNotes.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500">
-            {notes.length === 0 ? 'No notes uploaded yet.' : 'No notes match your search.'}
+            {notes.length === 0 ? 'You haven\'t uploaded any notes yet.' : 'No notes match your search.'}
           </p>
         </div>
       ) : (
@@ -173,8 +159,8 @@ export const BrowseNotes = () => {
               key={note.id} 
               note={note} 
               currentUserId={user?.id || ''} 
-              onUpdate={fetchNotes}
-              showOwnerActions={false}
+              onUpdate={fetchMyNotes}
+              showOwnerActions={true}
             />
           ))}
         </div>

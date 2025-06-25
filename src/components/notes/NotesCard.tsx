@@ -34,9 +34,15 @@ interface NotesCardProps {
   note: Note;
   currentUserId: string;
   onUpdate: () => void;
+  showOwnerActions?: boolean; // New prop to control owner actions visibility
 }
 
-export const NotesCard: React.FC<NotesCardProps> = ({ note, currentUserId, onUpdate }) => {
+export const NotesCard: React.FC<NotesCardProps> = ({ 
+  note, 
+  currentUserId, 
+  onUpdate, 
+  showOwnerActions = false 
+}) => {
   const { toast } = useToast();
   const isOwner = note.user_id === currentUserId;
 
@@ -192,15 +198,24 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, currentUserId, onUpd
         )}
 
         <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleLike}
-            className="flex items-center gap-2 px-4 py-2"
-          >
-            <Heart size={16} />
-            <span>{note.likes_count}</span>
-          </Button>
+          {!showOwnerActions && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLike}
+              className="flex items-center gap-2 px-4 py-2"
+            >
+              <Heart size={16} />
+              <span>{note.likes_count}</span>
+            </Button>
+          )}
+          
+          {showOwnerActions && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Heart size={16} />
+              <span>{note.likes_count} likes</span>
+            </div>
+          )}
           
           <div className="flex gap-3">
             {note.file_url && (
@@ -215,7 +230,7 @@ export const NotesCard: React.FC<NotesCardProps> = ({ note, currentUserId, onUpd
               </Button>
             )}
             
-            {isOwner && (
+            {isOwner && showOwnerActions && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 

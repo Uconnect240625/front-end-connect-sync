@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrowseNotes } from './BrowseNotes';
 import { UploadNotesForm } from './UploadNotesForm';
+import { MyNotes } from './MyNotes';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,13 +25,18 @@ export const NotesHub = () => {
           <h1 className="text-2xl font-bold text-center mb-6">📚 U Connect Notes Hub</h1>
 
           <Tabs defaultValue="browse" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="browse">Browse Notes</TabsTrigger>
+              <TabsTrigger value="my-notes">My Notes</TabsTrigger>
               <TabsTrigger value="upload">Upload Notes</TabsTrigger>
             </TabsList>
             
             <TabsContent value="browse" className="mt-6">
               <BrowseNotes />
+            </TabsContent>
+            
+            <TabsContent value="my-notes" className="mt-6">
+              <MyNotes />
             </TabsContent>
             
             <TabsContent value="upload" className="mt-6">
