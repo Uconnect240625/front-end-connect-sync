@@ -85,8 +85,8 @@ const AdminDashboard = () => {
       setApprovalItems(allApprovalItems);
       setComplaints(complaintsData.data || []);
 
-      // Calculate stats
-      const paidItems = allApprovalItems.filter(item => item.payment_status === 'paid');
+      // Calculate stats - use is_paid field instead of payment_status
+      const paidItems = allApprovalItems.filter(item => item.is_paid === true);
       const totalRevenue = paidItems.length * 50; // Assuming ₹50 per paid item
 
       setStats({

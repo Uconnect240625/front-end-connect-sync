@@ -36,7 +36,14 @@ const HelpCenterAdmin = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setComplaints(data || []);
+      
+      // Map the data to ensure priority field is present with default value
+      const complaintsWithPriority = (data || []).map(complaint => ({
+        ...complaint,
+        priority: complaint.priority || 'medium' // Provide default value if missing
+      }));
+      
+      setComplaints(complaintsWithPriority);
     } catch (error) {
       console.error('Error loading complaints:', error);
       toast.error('Failed to load complaints');

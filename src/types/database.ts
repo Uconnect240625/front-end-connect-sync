@@ -1,6 +1,5 @@
 
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
-export type PaymentStatus = 'unpaid' | 'paid' | 'verified';
 export type ComplaintStatus = 'pending' | 'in_progress' | 'resolved';
 
 export interface PGListing {
@@ -17,7 +16,7 @@ export interface PGListing {
   facilities?: string[];
   images?: string[];
   approval_status: ApprovalStatus;
-  payment_status: PaymentStatus;
+  is_paid: boolean;  // This is the actual field in the database
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -36,7 +35,7 @@ export interface MarketplaceItem {
   contact_email?: string;
   images?: string[];
   approval_status: ApprovalStatus;
-  payment_status: PaymentStatus;
+  is_paid: boolean;  // This is the actual field in the database
   is_sold: boolean;
   is_active: boolean;
   created_at: string;
@@ -57,7 +56,7 @@ export interface ClubEvent {
   registration_required: boolean;
   contact_info?: string;
   approval_status: ApprovalStatus;
-  payment_status: PaymentStatus;
+  is_paid: boolean;  // This is the actual field in the database
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -70,7 +69,7 @@ export interface Complaint {
   title: string;
   description: string;
   category: string;
-  priority: string;
+  priority?: string;  // Make this optional since it might not always be present
   status: ComplaintStatus;
   admin_response?: string;
   created_at: string;

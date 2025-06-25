@@ -13,7 +13,7 @@ interface ApprovalItem {
   type: 'pg_listing' | 'marketplace_item' | 'club_event';
   user_name?: string;
   created_at: string;
-  payment_status: string;
+  is_paid: boolean;  // Use is_paid instead of payment_status
   approval_status: ApprovalStatus;
 }
 
@@ -82,9 +82,9 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
                       <span>{getTypeIcon(item.type)}</span>
                       <Badge variant="outline">{getTypeLabel(item.type)}</Badge>
                       <Badge 
-                        variant={item.payment_status === 'paid' ? 'default' : 'destructive'}
+                        variant={item.is_paid ? 'default' : 'destructive'}
                       >
-                        {item.payment_status}
+                        {item.is_paid ? 'paid' : 'unpaid'}
                       </Badge>
                     </div>
                     <h4 className="font-semibold">{item.title}</h4>
