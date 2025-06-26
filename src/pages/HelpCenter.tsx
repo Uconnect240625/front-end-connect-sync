@@ -39,6 +39,32 @@ const HelpCenter = () => {
     setLoading(true);
     
     try {
+      let fileUrl = null;
+
+      // Upload file if provided
+      if (formData.screenshot) {
+        const fileExt = formData.screenshot.name.split('.').pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const filePath = `complaints/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('complaint-files')
+          .upload(filePath, formData.screenshot);
+
+        if (uploadError) {
+          console.error('File upload error:', uploadError);
+          toast.error('Failed to upload file. Please try again.');
+          return;
+        }
+
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('complaint-files')
+          .getPublicUrl(filePath);
+
+        fileUrl = publicUrl;
+      }
+
       const { error } = await supabase
         .from('complaints')
         .insert({
@@ -47,7 +73,8 @@ const HelpCenter = () => {
           title: formData.issueTitle,
           category: formData.issueCategory,
           description: formData.description,
-          status: 'open'
+          status: 'open',
+          file_url: fileUrl
         });
 
       if (error) throw error;
@@ -157,17 +184,18 @@ const HelpCenter = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="screenshot">📎 Upload Screenshot (Optional)</Label>
+                <Label htmlFor="screenshot">📎 Upload Screenshot/File (Optional)</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="screenshot"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.pdf,.doc,.docx"
                     onChange={handleFileChange}
                     className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
                   <Upload className="h-4 w-4 text-gray-400" />
                 </div>
+                <p className="text-xs text-gray-500">Accepted formats: Images, PDF, Word documents</p>
               </div>
 
               <Button
