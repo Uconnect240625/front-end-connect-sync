@@ -15,9 +15,9 @@ interface Complaint {
   category: string;
   description: string;
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  admin_response: string | null;
   created_at: string;
   updated_at: string;
+  file_url?: string | null;
 }
 
 const HelpCenterAdmin = () => {

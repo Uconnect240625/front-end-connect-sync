@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Download, Trash2 } from 'lucide-react';
@@ -16,7 +15,6 @@ interface Complaint {
   category: string;
   description: string;
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  admin_response: string | null;
   created_at: string;
   updated_at: string;
   file_url?: string | null;
@@ -31,8 +29,6 @@ const ComplaintsManager = ({
   complaints,
   onComplaintUpdate
 }: ComplaintsManagerProps) => {
-  const [responses, setResponses] = React.useState<Record<string, string>>({});
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -41,16 +37,12 @@ const ComplaintsManager = ({
     return `${day}/${month}/${year}`;
   };
 
-  const handleStatusUpdate = async (complaintId: string, status: 'open' | 'in_progress' | 'resolved' | 'closed', response?: string) => {
+  const handleStatusUpdate = async (complaintId: string, status: 'open' | 'in_progress' | 'resolved' | 'closed') => {
     try {
-      const updateData: any = {
+      const updateData = {
         status,
         updated_at: new Date().toISOString()
       };
-
-      if (response) {
-        updateData.admin_response = response;
-      }
 
       const { error } = await supabase
         .from('complaints')
@@ -60,7 +52,6 @@ const ComplaintsManager = ({
       if (error) throw error;
 
       toast.success('Complaint updated successfully');
-      setResponses(prev => ({ ...prev, [complaintId]: '' }));
       onComplaintUpdate();
     } catch (error) {
       console.error('Error updating complaint:', error);
@@ -197,44 +188,28 @@ const ComplaintsManager = ({
                         </div>
                       </div>
                     )}
-
-                    {complaint.admin_response && (
-                      <div className="mt-3 p-3 bg-blue-50 rounded border-l-4 border-blue-500">
-                        <p className="text-sm font-medium text-blue-800">Admin Response:</p>
-                        <p className="text-sm text-blue-700">{complaint.admin_response}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
                 
-                {complaint.status !== 'closed' && (
-                  <div className="space-y-3">
-                    <Textarea
-                      placeholder="Add admin response (optional)"
-                      value={responses[complaint.id] || ''}
-                      onChange={(e) => setResponses(prev => ({ ...prev, [complaint.id]: e.target.value }))}
-                      className="min-h-[80px]"
-                    />
-                    
-                    <div className="flex gap-2 flex-wrap">
-                      {complaint.status === 'open' && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleStatusUpdate(complaint.id, 'in_progress', responses[complaint.id])}
-                          className="bg-yellow-600 hover:bg-yellow-700"
-                        >
-                          🔄 Start Working
-                        </Button>
-                      )}
-                      
+                {complaint.status !== 'resolved' && (
+                  <div className="flex gap-2 flex-wrap">
+                    {complaint.status === 'open' && (
                       <Button
                         size="sm"
-                        onClick={() => handleStatusUpdate(complaint.id, 'resolved', responses[complaint.id])}
-                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => handleStatusUpdate(complaint.id, 'in_progress')}
+                        className="bg-yellow-600 hover:bg-yellow-700"
                       >
-                        ✅ Mark as Resolved
+                        🔄 Start Working
                       </Button>
-                    </div>
+                    )}
+                    
+                    <Button
+                      size="sm"
+                      onClick={() => handleStatusUpdate(complaint.id, 'resolved')}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      ✅ Mark as Resolved
+                    </Button>
                   </div>
                 )}
 
