@@ -40,7 +40,7 @@ const HelpCenter = () => {
     try {
       let fileUrl = null;
 
-      // Upload file if provided
+      // Upload file if provided - using the same approach as notes upload
       if (formData.screenshot) {
         console.log('Starting file upload for complaint...');
         console.log('File details:', {
@@ -55,13 +55,6 @@ const HelpCenter = () => {
 
         console.log('Uploading file to path:', filePath);
 
-        // Check if bucket exists and is accessible
-        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-        console.log('Available buckets:', buckets);
-        if (bucketsError) {
-          console.error('Error listing buckets:', bucketsError);
-        }
-
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('complaint-files')
           .upload(filePath, formData.screenshot, {
@@ -72,12 +65,10 @@ const HelpCenter = () => {
         if (uploadError) {
           console.error('File upload error:', uploadError);
           console.error('Upload error details:', {
-            message: uploadError.message,
-            statusCode: uploadError.statusCode,
-            error: uploadError.error
+            message: uploadError.message
           });
           
-          // Try to get more specific error information
+          // Handle specific error cases
           if (uploadError.message.includes('bucket')) {
             toast.error('File storage not properly configured. Please contact admin.');
           } else if (uploadError.message.includes('policy')) {
@@ -91,7 +82,7 @@ const HelpCenter = () => {
 
         console.log('File uploaded successfully:', uploadData);
 
-        // Get the public URL
+        // Get the public URL - same as notes upload
         const { data: urlData } = supabase.storage
           .from('complaint-files')
           .getPublicUrl(filePath);
@@ -124,12 +115,6 @@ const HelpCenter = () => {
 
       if (insertError) {
         console.error('Database insert error:', insertError);
-        console.error('Insert error details:', {
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint,
-          code: insertError.code
-        });
         throw insertError;
       }
 
