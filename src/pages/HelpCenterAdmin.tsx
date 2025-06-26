@@ -13,8 +13,8 @@ interface Complaint {
   university_id: string;
   title: string;
   category: string;
-  description: text;
-  status: 'pending' | 'in_progress' | 'resolved';
+  description: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
   admin_response: string | null;
   created_at: string;
   updated_at: string;

@@ -47,7 +47,7 @@ const HelpCenter = () => {
           title: formData.issueTitle,
           category: formData.issueCategory,
           description: formData.description,
-          status: 'pending'
+          status: 'open'
         });
 
       if (error) throw error;

@@ -14,7 +14,7 @@ interface Complaint {
   title: string;
   category: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'resolved';
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
   admin_response: string | null;
   created_at: string;
   updated_at: string;
@@ -28,7 +28,7 @@ interface ComplaintsManagerProps {
 const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerProps) => {
   const [responses, setResponses] = React.useState<Record<string, string>>({});
 
-  const handleStatusUpdate = async (complaintId: string, status: 'pending' | 'in_progress' | 'resolved', response?: string) => {
+  const handleStatusUpdate = async (complaintId: string, status: 'open' | 'in_progress' | 'resolved' | 'closed', response?: string) => {
     try {
       const updateData: any = { 
         status,
@@ -57,18 +57,20 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'destructive';
+      case 'open': return 'destructive';
       case 'in_progress': return 'default';
       case 'resolved': return 'secondary';
+      case 'closed': return 'outline';
       default: return 'outline';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pending': return 'Pending';
+      case 'open': return 'Open';
       case 'in_progress': return 'In Progress';
       case 'resolved': return 'Resolved';
+      case 'closed': return 'Closed';
       default: return status;
     }
   };
@@ -111,7 +113,7 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
                   </div>
                 </div>
                 
-                {complaint.status !== 'resolved' && (
+                {complaint.status !== 'resolved' && complaint.status !== 'closed' && (
                   <div className="space-y-3">
                     <Textarea
                       placeholder="Add response (optional)"
@@ -124,7 +126,7 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
                     />
                     
                     <div className="flex gap-2">
-                      {complaint.status === 'pending' && (
+                      {complaint.status === 'open' && (
                         <Button
                           size="sm"
                           onClick={() => handleStatusUpdate(complaint.id, 'in_progress')}
