@@ -36,19 +36,21 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
     try {
       console.log('Starting complaint deletion:', { complaintId, fileUrl });
 
-      // Delete the file from storage if it exists
+      // Delete the file from storage if it exists - using notes bucket pattern
       if (fileUrl) {
         try {
-          // Extract the file path from the URL
+          // Extract the file path from the URL (same pattern as notes)
           const url = new URL(fileUrl);
           const pathParts = url.pathname.split('/');
+          // Get the user folder and filename (e.g., "user-id/timestamp.ext")
+          const userFolder = pathParts[pathParts.length - 2];
           const fileName = pathParts[pathParts.length - 1];
-          const filePath = `complaints/${fileName}`;
+          const filePath = `${userFolder}/${fileName}`;
 
           console.log('Attempting to delete complaint file:', filePath);
 
           const { error: deleteFileError } = await supabase.storage
-            .from('complaint-files')
+            .from('notes')
             .remove([filePath]);
 
           if (deleteFileError) {
@@ -79,10 +81,9 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
       console.log('Complaint deleted successfully from database');
       toast.success('Complaint deleted successfully');
       
-      // Force a refresh by calling the update function
-      setTimeout(() => {
-        onComplaintUpdate();
-      }, 500);
+      // Immediate callback to refresh the UI
+      console.log('Calling onComplaintUpdate callback');
+      onComplaintUpdate();
       
     } catch (error) {
       console.error('Error deleting complaint:', error);
