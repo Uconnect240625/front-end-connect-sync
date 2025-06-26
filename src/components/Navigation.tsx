@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Menu, X, Home, BookOpen, Calendar, UtensilsCrossed, ShoppingCart, Building, Megaphone, HelpCircle, Settings } from 'lucide-react';
+import { LogOut, User, Menu, X, Home, BookOpen, Calendar, UtensilsCrossed, ShoppingCart, Building, Megaphone, HelpCircle, Settings, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,6 +24,14 @@ export default function Navigation() {
     { icon: HelpCircle, label: 'Help Center', path: '/help' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
+
+  // Add admin-specific navigation items
+  if (profile.role === 'admin') {
+    navigationItems.splice(-1, 0, 
+      { icon: Shield, label: 'Admin Dashboard', path: '/admin' },
+      { icon: UtensilsCrossed, label: 'Manage Mess Menu', path: '/mess-menu-admin' }
+    );
+  }
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -50,7 +58,8 @@ export default function Navigation() {
             <h1 className="text-2xl font-bold text-blue-900 cursor-pointer" onClick={() => navigate('/')}>
               <span className="px-1 mx-1 rounded">U</span>Connect
             </h1>
-            <span className="text-sm text-gray-600 capitalize">
+            <span className="text-sm text-gray-600 capitalize flex items-center gap-1">
+              {profile.role === 'admin' && <Shield size={14} className="text-red-600" />}
               {profile.role} Dashboard
             </span>
           </div>
@@ -61,7 +70,7 @@ export default function Navigation() {
                 className="flex items-center space-x-2 cursor-pointer"
                 onClick={toggleProfileDropdown}
               >
-                <div className="w-8 h-8 bg-blue-900 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                <div className={`w-8 h-8 ${profile.role === 'admin' ? 'bg-red-600' : 'bg-blue-900'} text-white rounded-full flex items-center justify-center text-sm font-medium`}>
                   {getInitials(profile.full_name)}
                 </div>
                 <span className="text-sm font-medium hidden md:block">{profile.full_name}</span>
@@ -71,7 +80,10 @@ export default function Navigation() {
                 <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg min-w-48 z-50">
                   <div className="p-3 border-b border-gray-100">
                     <p className="font-medium text-sm">{profile.full_name}</p>
-                    <p className="text-xs text-gray-500 capitalize">{profile.role}</p>
+                    <p className="text-xs text-gray-500 capitalize flex items-center gap-1">
+                      {profile.role === 'admin' && <Shield size={12} className="text-red-600" />}
+                      {profile.role}
+                    </p>
                   </div>
                   <div className="py-1">
                     <button
@@ -81,6 +93,15 @@ export default function Navigation() {
                       <User size={16} />
                       <span>View Profile</span>
                     </button>
+                    {profile.role === 'admin' && (
+                      <button
+                        onClick={() => { navigate('/admin'); setIsProfileDropdownOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center space-x-2 text-red-600"
+                      >
+                        <Shield size={16} />
+                        <span>Admin Dashboard</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => { navigate('/settings'); setIsProfileDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center space-x-2"
@@ -128,7 +149,9 @@ export default function Navigation() {
             <button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
-              className="w-full text-left px-6 py-3 hover:bg-gray-50 flex items-center space-x-3 text-gray-700 hover:text-blue-900"
+              className={`w-full text-left px-6 py-3 hover:bg-gray-50 flex items-center space-x-3 text-gray-700 hover:text-blue-900 ${
+                item.label === 'Admin Dashboard' || item.label === 'Manage Mess Menu' ? 'text-red-600 hover:text-red-700' : ''
+              }`}
             >
               <item.icon size={20} />
               <span>{item.label}</span>

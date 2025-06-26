@@ -9,6 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { BarChart3, DollarSign, UtensilsCrossed, Users, FileText, Building, Calendar, ShoppingBag } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { profile } = useAuth();
@@ -104,6 +107,30 @@ const AdminDashboard = () => {
     }
   };
 
+  const quickActions = [
+    {
+      title: 'Analytics Dashboard',
+      description: 'View detailed analytics and insights',
+      icon: BarChart3,
+      action: () => navigate('/admin/analytics'),
+      color: 'bg-blue-500'
+    },
+    {
+      title: 'Revenue Management',
+      description: 'Track earnings and financial data',
+      icon: DollarSign,
+      action: () => navigate('/admin/revenue'),
+      color: 'bg-green-500'
+    },
+    {
+      title: 'Manage Mess Menu',
+      description: 'Update weekly mess menu',
+      icon: UtensilsCrossed,
+      action: () => navigate('/mess-menu-admin'),
+      color: 'bg-orange-500'
+    }
+  ];
+
   if (!profile || profile.role !== 'admin') {
     return null;
   }
@@ -120,10 +147,32 @@ const AdminDashboard = () => {
 
         <AdminStats stats={stats} />
 
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {quickActions.map((action, index) => (
+              <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={action.action}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg ${action.color} text-white`}>
+                      <action.icon size={24} />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{action.title}</CardTitle>
+                      <CardDescription>{action.description}</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
+
         <Tabs defaultValue="approvals" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="approvals">Pending Approvals</TabsTrigger>
-            <TabsTrigger value="complaints">Complaints</TabsTrigger>
+            <TabsTrigger value="approvals">Pending Approvals ({stats.pendingApprovals})</TabsTrigger>
+            <TabsTrigger value="complaints">Complaints ({stats.pendingComplaints})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="approvals">
