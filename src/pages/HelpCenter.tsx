@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,7 +40,7 @@ const HelpCenter = () => {
     try {
       let fileUrl = null;
 
-      // Upload file if provided - using the exact same approach as notes upload
+      // Upload file if provided - using the same approach as notes upload
       if (formData.screenshot) {
         console.log('Starting file upload for complaint...');
         console.log('File details:', {
@@ -51,20 +50,32 @@ const HelpCenter = () => {
         });
         
         const fileExt = formData.screenshot.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        
-        console.log('Uploading file to path:', fileName);
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const filePath = `complaints/${fileName}`;
+
+        console.log('Uploading file to path:', filePath);
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('notes')
-          .upload(fileName, formData.screenshot, {
+          .from('complaint-files')
+          .upload(filePath, formData.screenshot, {
             cacheControl: '3600',
             upsert: false
           });
 
         if (uploadError) {
           console.error('File upload error:', uploadError);
-          toast.error(`Failed to upload file: ${uploadError.message}`);
+          console.error('Upload error details:', {
+            message: uploadError.message
+          });
+          
+          // Handle specific error cases
+          if (uploadError.message.includes('bucket')) {
+            toast.error('File storage not properly configured. Please contact admin.');
+          } else if (uploadError.message.includes('policy')) {
+            toast.error('You do not have permission to upload files. Please contact admin.');
+          } else {
+            toast.error(`Failed to upload file: ${uploadError.message}`);
+          }
           setLoading(false);
           return;
         }
@@ -73,8 +84,8 @@ const HelpCenter = () => {
 
         // Get the public URL - same as notes upload
         const { data: urlData } = supabase.storage
-          .from('notes')
-          .getPublicUrl(fileName);
+          .from('complaint-files')
+          .getPublicUrl(filePath);
 
         fileUrl = urlData.publicUrl;
         console.log('File public URL:', fileUrl);
