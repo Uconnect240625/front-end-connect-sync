@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import ComplaintsManager from '@/components/admin/ComplaintsManager';
@@ -6,8 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Complaint } from '@/types/database';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 
 const HelpCenterAdmin = () => {
   const { profile } = useAuth();
@@ -91,28 +90,9 @@ const HelpCenterAdmin = () => {
       <Navigation />
       
       <div className="max-w-4xl mx-auto pt-8 px-4">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/uconnect')}
-            className="text-blue-600 hover:text-blue-800 mb-4"
-          >
-            <ArrowLeft size={20} />
-            Back to U Connect
-          </Button>
-        </div>
-
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-red-600 mb-4">Help Center Admin</h1>
           <p className="text-gray-600">Manage and resolve student complaints and issues</p>
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-blue-800">
-              <strong>Total Complaints:</strong> {complaints.length} | 
-              <strong> Pending:</strong> {complaints.filter(c => c.status === 'pending').length} | 
-              <strong> In Progress:</strong> {complaints.filter(c => c.status === 'in_progress').length} | 
-              <strong> Resolved:</strong> {complaints.filter(c => c.status === 'resolved').length}
-            </p>
-          </div>
         </div>
 
         <ComplaintsManager 
