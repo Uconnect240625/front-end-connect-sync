@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,9 +40,14 @@ const HelpCenter = () => {
     try {
       let fileUrl = null;
 
-      // Upload file if provided - following the notes upload pattern
+      // Upload file if provided
       if (formData.screenshot) {
         console.log('Starting file upload for complaint...');
+        console.log('File details:', {
+          name: formData.screenshot.name,
+          size: formData.screenshot.size,
+          type: formData.screenshot.type
+        });
         
         const fileExt = formData.screenshot.name.split('.').pop();
         const fileName = `${user.id}-${Date.now()}.${fileExt}`;
@@ -60,7 +64,12 @@ const HelpCenter = () => {
 
         if (uploadError) {
           console.error('File upload error:', uploadError);
-          toast.error('Failed to upload file. Please try again.');
+          console.error('Upload error details:', {
+            message: uploadError.message,
+            stack: uploadError.stack
+          });
+          toast.error(`Failed to upload file: ${uploadError.message}`);
+          setLoading(false);
           return;
         }
 
@@ -75,9 +84,16 @@ const HelpCenter = () => {
         console.log('File public URL:', fileUrl);
       }
 
-      console.log('Creating complaint with file URL:', fileUrl);
+      console.log('Creating complaint with data:', {
+        user_id: user.id,
+        university_id: profile.university_id,
+        title: formData.issueTitle,
+        category: formData.issueCategory,
+        description: formData.description,
+        file_url: fileUrl
+      });
 
-      const { error } = await supabase
+      const { data: insertData, error: insertError } = await supabase
         .from('complaints')
         .insert({
           user_id: user.id,
@@ -87,13 +103,20 @@ const HelpCenter = () => {
           description: formData.description,
           status: 'open',
           file_url: fileUrl
-        });
+        })
+        .select();
 
-      if (error) {
-        console.error('Database insert error:', error);
-        throw error;
+      if (insertError) {
+        console.error('Database insert error:', insertError);
+        console.error('Insert error details:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint
+        });
+        throw insertError;
       }
 
+      console.log('Complaint created successfully:', insertData);
       toast.success('✅ Issue submitted successfully! We will review your complaint and get back to you soon.');
       
       // Reset form

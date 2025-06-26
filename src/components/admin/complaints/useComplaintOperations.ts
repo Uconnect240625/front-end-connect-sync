@@ -5,18 +5,25 @@ import { toast } from 'sonner';
 export const useComplaintOperations = (onComplaintUpdate: () => void) => {
   const handleStatusUpdate = async (complaintId: string, status: 'open' | 'in_progress' | 'resolved' | 'closed') => {
     try {
+      console.log('Updating complaint status:', { complaintId, status });
+      
       const updateData = {
         status,
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('complaints')
         .update(updateData)
-        .eq('id', complaintId);
+        .eq('id', complaintId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Status update error:', error);
+        throw error;
+      }
 
+      console.log('Status updated successfully:', data);
       toast.success('Complaint status updated successfully');
       onComplaintUpdate();
     } catch (error) {
@@ -27,10 +34,12 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
 
   const handleDeleteComplaint = async (complaintId: string, fileUrl?: string | null) => {
     try {
+      console.log('Starting complaint deletion:', { complaintId, fileUrl });
+
       // Delete the file from storage if it exists
       if (fileUrl) {
         try {
-          // Extract the file path from the URL - following the same pattern as notes
+          // Extract the file path from the URL
           const url = new URL(fileUrl);
           const pathParts = url.pathname.split('/');
           const fileName = pathParts[pathParts.length - 1];
@@ -44,6 +53,9 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
 
           if (deleteFileError) {
             console.error('Error deleting complaint file from storage:', deleteFileError);
+            console.error('File deletion error details:', {
+              message: deleteFileError.message
+            });
             // Continue with complaint deletion even if file deletion fails
           } else {
             console.log('Complaint file deleted successfully from storage');
@@ -55,13 +67,25 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
       }
 
       // Delete the complaint from database
-      const { error } = await supabase
+      console.log('Deleting complaint from database:', complaintId);
+      
+      const { data, error } = await supabase
         .from('complaints')
         .delete()
-        .eq('id', complaintId);
+        .eq('id', complaintId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database deletion error:', error);
+        console.error('Deletion error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
 
+      console.log('Complaint deleted successfully from database:', data);
       toast.success('Complaint deleted successfully');
       onComplaintUpdate();
     } catch (error) {
