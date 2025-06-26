@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +21,9 @@ const MessMenu = () => {
 
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  
+  // Define the meal order
+  const mealOrder = ['breakfast', 'lunch', 'snacks', 'dinner'];
 
   useEffect(() => {
     if (profile?.university_id) {
@@ -120,6 +122,12 @@ const MessMenu = () => {
     }
   };
 
+  const getSortedMeals = (dayMenu: { [mealType: string]: string }) => {
+    return mealOrder
+      .filter(mealType => dayMenu[mealType]) // Only include meals that exist
+      .map(mealType => [mealType, dayMenu[mealType]]);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -171,7 +179,7 @@ const MessMenu = () => {
 
         <div className="space-y-4">
           {menuData[activeDay] ? (
-            Object.entries(menuData[activeDay]).map(([meal, items]) => (
+            getSortedMeals(menuData[activeDay]).map(([meal, items]) => (
               <div key={meal} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                 <h3 className="font-semibold text-red-600 mb-2 capitalize flex items-center gap-2">
                   <span className="text-lg">{getMealIcon(meal)}</span>
