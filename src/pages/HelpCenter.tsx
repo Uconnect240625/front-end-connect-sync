@@ -41,15 +41,22 @@ const HelpCenter = () => {
     try {
       let fileUrl = null;
 
-      // Upload file if provided
+      // Upload file if provided - following the notes upload pattern
       if (formData.screenshot) {
+        console.log('Starting file upload for complaint...');
+        
         const fileExt = formData.screenshot.name.split('.').pop();
         const fileName = `${user.id}-${Date.now()}.${fileExt}`;
         const filePath = `complaints/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        console.log('Uploading file to path:', filePath);
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('complaint-files')
-          .upload(filePath, formData.screenshot);
+          .upload(filePath, formData.screenshot, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
         if (uploadError) {
           console.error('File upload error:', uploadError);
@@ -57,13 +64,18 @@ const HelpCenter = () => {
           return;
         }
 
+        console.log('File uploaded successfully:', uploadData);
+
         // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
+        const { data: urlData } = supabase.storage
           .from('complaint-files')
           .getPublicUrl(filePath);
 
-        fileUrl = publicUrl;
+        fileUrl = urlData.publicUrl;
+        console.log('File public URL:', fileUrl);
       }
+
+      console.log('Creating complaint with file URL:', fileUrl);
 
       const { error } = await supabase
         .from('complaints')
@@ -77,7 +89,10 @@ const HelpCenter = () => {
           file_url: fileUrl
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database insert error:', error);
+        throw error;
+      }
 
       toast.success('✅ Issue submitted successfully! We will review your complaint and get back to you soon.');
       
@@ -108,6 +123,7 @@ const HelpCenter = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    console.log('File selected:', file?.name, file?.size);
     setFormData(prev => ({ ...prev, screenshot: file }));
   };
 
@@ -196,6 +212,9 @@ const HelpCenter = () => {
                   <Upload className="h-4 w-4 text-gray-400" />
                 </div>
                 <p className="text-xs text-gray-500">Accepted formats: Images, PDF, Word documents</p>
+                {formData.screenshot && (
+                  <p className="text-sm text-green-600">File selected: {formData.screenshot.name}</p>
+                )}
               </div>
 
               <Button

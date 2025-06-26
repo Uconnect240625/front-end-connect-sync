@@ -42,6 +42,8 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
+      console.log('Loading dashboard data for university:', profile?.university_id);
+      
       // Load pending approvals from all tables
       const [pgListings, marketplaceItems, clubEvents, complaintsData] = await Promise.all([
         supabase
@@ -62,11 +64,12 @@ const AdminDashboard = () => {
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
+        // Load all complaints (not just unresolved ones)
         supabase
           .from('complaints')
           .select('*')
           .eq('university_id', profile?.university_id)
-          .neq('status', 'resolved')
+          .order('created_at', { ascending: false })
       ]);
 
       // Combine approval items
@@ -88,15 +91,22 @@ const AdminDashboard = () => {
       setApprovalItems(allApprovalItems);
       setComplaints(complaintsData.data || []);
 
+      console.log('Loaded complaints:', complaintsData.data);
+
       // Calculate stats - use is_paid field instead of payment_status
       const paidItems = allApprovalItems.filter(item => item.is_paid === true);
       const totalRevenue = paidItems.length * 50; // Assuming ₹50 per paid item
+
+      // Count pending complaints (not resolved/closed)
+      const pendingComplaints = (complaintsData.data || []).filter(
+        complaint => complaint.status !== 'resolved' && complaint.status !== 'closed'
+      ).length;
 
       setStats({
         pendingApprovals: allApprovalItems.length,
         totalRevenue,
         activeUsers: 0, // This would need a separate query
-        pendingComplaints: complaintsData.data?.length || 0
+        pendingComplaints
       });
 
     } catch (error) {
@@ -172,7 +182,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="approvals" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="approvals">Pending Approvals ({stats.pendingApprovals})</TabsTrigger>
-            <TabsTrigger value="complaints">Complaints ({stats.pendingComplaints})</TabsTrigger>
+            <TabsTrigger value="complaints">Complaints ({complaints.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="approvals">

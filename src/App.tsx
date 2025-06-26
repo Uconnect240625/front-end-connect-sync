@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,7 +29,6 @@ import PostNotice from "./pages/PostNotice";
 import Settings from "./pages/Settings";
 import ProfilePage from "./pages/ProfilePage";
 import Notifications from "./pages/Notifications";
-import HelpCenterAdmin from "./pages/HelpCenterAdmin";
 
 const queryClient = new QueryClient();
 
@@ -93,14 +93,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <HelpCenter />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help-center-admin"
-              element={
-                <ProtectedRoute>
-                  <HelpCenterAdmin />
                 </ProtectedRoute>
               }
             />

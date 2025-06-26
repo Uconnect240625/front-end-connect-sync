@@ -30,25 +30,26 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
       // Delete the file from storage if it exists
       if (fileUrl) {
         try {
-          // Extract the file path from the URL
-          const urlParts = fileUrl.split('/');
-          const fileName = urlParts[urlParts.length - 1];
+          // Extract the file path from the URL - following the same pattern as notes
+          const url = new URL(fileUrl);
+          const pathParts = url.pathname.split('/');
+          const fileName = pathParts[pathParts.length - 1];
           const filePath = `complaints/${fileName}`;
 
-          console.log('Attempting to delete file:', filePath);
+          console.log('Attempting to delete complaint file:', filePath);
 
           const { error: deleteFileError } = await supabase.storage
             .from('complaint-files')
             .remove([filePath]);
 
           if (deleteFileError) {
-            console.error('Error deleting file from storage:', deleteFileError);
+            console.error('Error deleting complaint file from storage:', deleteFileError);
             // Continue with complaint deletion even if file deletion fails
           } else {
-            console.log('File deleted successfully from storage');
+            console.log('Complaint file deleted successfully from storage');
           }
         } catch (fileError) {
-          console.error('Error processing file deletion:', fileError);
+          console.error('Error processing complaint file deletion:', fileError);
           // Continue with complaint deletion
         }
       }
@@ -71,7 +72,7 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
 
   const handleDownloadFile = async (fileUrl: string, fileName: string) => {
     try {
-      console.log('Downloading file from URL:', fileUrl);
+      console.log('Downloading complaint file from URL:', fileUrl);
       
       const response = await fetch(fileUrl);
       if (!response.ok) {
@@ -80,18 +81,26 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
       
       const blob = await response.blob();
       
-      const url = window.URL.createObjectURL(blob);
+      // Determine file extension from URL or blob type
+      const url = new URL(fileUrl);
+      const pathParts = url.pathname.split('/');
+      const originalFileName = pathParts[pathParts.length - 1];
+      const fileExtension = originalFileName.split('.').pop() || 'file';
+      
+      const downloadFileName = `${fileName}.${fileExtension}`;
+      
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName || 'complaint-attachment';
+      link.href = downloadUrl;
+      link.download = downloadFileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(downloadUrl);
       
       toast.success('File downloaded successfully');
     } catch (error) {
-      console.error('Error downloading file:', error);
+      console.error('Error downloading complaint file:', error);
       toast.error('Failed to download file');
     }
   };
