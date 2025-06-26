@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Utensils, ArrowLeft, Calendar } from 'lucide-react';
 
 interface MenuData {
@@ -14,19 +15,27 @@ interface MenuData {
 const MessMenu = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profile } = useAuth();
   const [activeDay, setActiveDay] = useState('monday');
   const [menuData, setMenuData] = useState<MenuData>({});
   const [loading, setLoading] = useState(true);
 
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const dayNumbers = [1, 2, 3, 4, 5, 6, 0]; // Sunday is 0 in our database
 
   useEffect(() => {
-    fetchMenuData();
-  }, []);
+    if (profile?.university_id) {
+      fetchMenuData();
+    }
+  }, [profile?.university_id]);
 
   const fetchMenuData = async () => {
+    if (!profile?.university_id) {
+      console.log('No university_id available');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -36,10 +45,14 @@ const MessMenu = () => {
       monday.setDate(today.getDate() - today.getDay() + 1);
       const weekStart = monday.toISOString().split('T')[0];
 
+      console.log('Fetching menu data for university:', profile.university_id);
+      console.log('Week start:', weekStart);
+
       const { data, error } = await supabase
         .from('mess_menus')
         .select('day_of_week, meal_type, items')
         .eq('week_start_date', weekStart)
+        .eq('university_id', profile.university_id)
         .order('day_of_week')
         .order('meal_type');
 
@@ -53,6 +66,8 @@ const MessMenu = () => {
         return;
       }
 
+      console.log('Fetched menu data:', data);
+
       // Transform the data to match our component structure
       const transformedData: MenuData = {};
       
@@ -64,6 +79,7 @@ const MessMenu = () => {
         transformedData[dayName][item.meal_type.toLowerCase()] = item.items;
       });
 
+      console.log('Transformed menu data:', transformedData);
       setMenuData(transformedData);
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -178,6 +194,17 @@ const MessMenu = () => {
             Menu updates weekly • Last updated: {new Date().toLocaleDateString()}
           </p>
         </div>
+
+        {profile?.role === 'admin' && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => navigate('/mess-menu-admin')}
+              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
+              Manage Mess Menu
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
