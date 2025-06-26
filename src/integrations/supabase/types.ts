@@ -110,6 +110,7 @@ export type Database = {
           category: string
           created_at: string | null
           description: string
+          file_url: string | null
           id: string
           status: Database["public"]["Enums"]["complaint_status"] | null
           title: string
@@ -122,6 +123,7 @@ export type Database = {
           category: string
           created_at?: string | null
           description: string
+          file_url?: string | null
           id?: string
           status?: Database["public"]["Enums"]["complaint_status"] | null
           title: string
@@ -134,6 +136,7 @@ export type Database = {
           category?: string
           created_at?: string | null
           description?: string
+          file_url?: string | null
           id?: string
           status?: Database["public"]["Enums"]["complaint_status"] | null
           title?: string
