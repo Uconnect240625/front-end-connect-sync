@@ -1,14 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Utensils, Save, Calendar } from 'lucide-react';
-
 const MessMenuAdmin = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [day, setDay] = useState('Monday');
   const [meal, setMeal] = useState('Breakfast');
   const [items, setItems] = useState('');
@@ -21,34 +23,31 @@ const MessMenuAdmin = () => {
       checkAdminStatusAndGetUniversity();
     }
   }, [user]);
-
   const checkAdminStatusAndGetUniversity = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role, university_id')
-        .eq('id', user?.id)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('role, university_id').eq('id', user?.id).single();
       if (error || data?.role !== 'admin') {
         toast({
           title: "Access Denied",
           description: "You need admin privileges to access this page",
-          variant: "destructive",
+          variant: "destructive"
         });
         // Redirect to main page
         window.location.href = '/uconnect';
         return;
       }
-
       setUniversityId(data.university_id);
     } catch (error) {
       console.error('Error checking admin status:', error);
     }
   };
-
   const getDayNumber = (dayName: string): number => {
-    const dayMap: { [key: string]: number } = {
+    const dayMap: {
+      [key: string]: number;
+    } = {
       'Sunday': 0,
       'Monday': 1,
       'Tuesday': 2,
@@ -59,26 +58,23 @@ const MessMenuAdmin = () => {
     };
     return dayMap[dayName] || 1;
   };
-
   const saveMenu = async () => {
     if (!items.trim()) {
       toast({
         title: "Error",
         description: "Please enter menu items",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     if (!universityId) {
       toast({
         title: "Error",
         description: "University information not found",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setLoading(true);
     try {
       // Get current week's Monday
@@ -86,55 +82,45 @@ const MessMenuAdmin = () => {
       const monday = new Date(today);
       monday.setDate(today.getDate() - today.getDay() + 1);
       const weekStart = monday.toISOString().split('T')[0];
-
       const dayNumber = getDayNumber(day);
 
       // Check if menu already exists for this day/meal/week
-      const { data: existingMenu, error: fetchError } = await supabase
-        .from('mess_menus')
-        .select('id')
-        .eq('day_of_week', dayNumber)
-        .eq('meal_type', meal)
-        .eq('week_start_date', weekStart)
-        .eq('university_id', universityId)
-        .maybeSingle();
-
+      const {
+        data: existingMenu,
+        error: fetchError
+      } = await supabase.from('mess_menus').select('id').eq('day_of_week', dayNumber).eq('meal_type', meal).eq('week_start_date', weekStart).eq('university_id', universityId).maybeSingle();
       if (fetchError) {
         throw fetchError;
       }
-
       let error;
       if (existingMenu) {
         // Update existing menu
-        const { error: updateError } = await supabase
-          .from('mess_menus')
-          .update({ 
-            items: items.trim(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingMenu.id);
+        const {
+          error: updateError
+        } = await supabase.from('mess_menus').update({
+          items: items.trim(),
+          updated_at: new Date().toISOString()
+        }).eq('id', existingMenu.id);
         error = updateError;
       } else {
         // Insert new menu
-        const { error: insertError } = await supabase
-          .from('mess_menus')
-          .insert({
-            day_of_week: dayNumber,
-            meal_type: meal,
-            items: items.trim(),
-            week_start_date: weekStart,
-            university_id: universityId
-          });
+        const {
+          error: insertError
+        } = await supabase.from('mess_menus').insert({
+          day_of_week: dayNumber,
+          meal_type: meal,
+          items: items.trim(),
+          week_start_date: weekStart,
+          university_id: universityId
+        });
         error = insertError;
       }
-
       if (error) {
         throw error;
       }
-
       toast({
         title: "Success",
-        description: `Menu updated for ${day} - ${meal}`,
+        description: `Menu updated for ${day} - ${meal}`
       });
 
       // Clear the form
@@ -144,15 +130,13 @@ const MessMenuAdmin = () => {
       toast({
         title: "Error",
         description: "Failed to save menu. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <Navigation />
       <div className="max-w-md mx-auto pt-20 px-4">
         <div className="text-center mb-6">
@@ -171,12 +155,7 @@ const MessMenuAdmin = () => {
             <label htmlFor="day" className="block font-medium mb-2 text-gray-700">
               Select Day
             </label>
-            <select 
-              id="day" 
-              value={day} 
-              onChange={(e) => setDay(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
-            >
+            <select id="day" value={day} onChange={e => setDay(e.target.value)} className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors">
               <option>Monday</option>
               <option>Tuesday</option>
               <option>Wednesday</option>
@@ -191,12 +170,7 @@ const MessMenuAdmin = () => {
             <label htmlFor="meal" className="block font-medium mb-2 text-gray-700">
               Select Meal
             </label>
-            <select 
-              id="meal" 
-              value={meal} 
-              onChange={(e) => setMeal(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
-            >
+            <select id="meal" value={meal} onChange={e => setMeal(e.target.value)} className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors">
               <option>Breakfast</option>
               <option>Lunch</option>
               <option>Snacks</option>
@@ -208,46 +182,22 @@ const MessMenuAdmin = () => {
             <label htmlFor="items" className="block font-medium mb-2 text-gray-700">
               Enter Menu Items
             </label>
-            <textarea 
-              id="items" 
-              value={items}
-              onChange={(e) => setItems(e.target.value)}
-              placeholder="e.g., Chole Bhature, Salad, Rice, Pickle"
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
-              rows={3}
-            />
+            <textarea id="items" value={items} onChange={e => setItems(e.target.value)} placeholder="e.g., Chole Bhature, Salad, Rice, Pickle" className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none" rows={3} />
           </div>
 
-          <button 
-            onClick={saveMenu}
-            disabled={loading || !universityId}
-            className="w-full bg-red-600 text-white py-3 rounded-md font-bold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
+          <button onClick={saveMenu} disabled={loading || !universityId} className="w-full bg-red-600 text-white py-3 rounded-md font-bold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            {loading ? <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 Saving...
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Save size={20} />
                 Save Menu
-              </>
-            )}
+              </>}
           </button>
         </div>
 
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-medium text-blue-800 mb-2">📝 Quick Tips:</h3>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>• Separate multiple items with commas</li>
-            <li>• Updates are applied to the current week</li>
-            <li>• Changes are visible immediately to students</li>
-          </ul>
-        </div>
+        
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default MessMenuAdmin;
