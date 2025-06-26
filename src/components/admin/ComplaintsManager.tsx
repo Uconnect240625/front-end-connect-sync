@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,12 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
 
       if (error) throw error;
 
-      toast.success('Complaint updated successfully');
+      const statusMessages = {
+        'in_progress': 'Complaint marked as in progress',
+        'resolved': 'Complaint resolved successfully'
+      };
+
+      toast.success(statusMessages[status] || 'Complaint updated successfully');
       setResponses(prev => ({ ...prev, [complaintId]: '' }));
       onComplaintUpdate();
     } catch (error) {
@@ -57,41 +61,58 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <span>🚨</span>
           Complaints Management
+          <Badge variant="outline" className="ml-auto">
+            {complaints.length} total
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           {complaints.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No complaints to review</p>
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🎉</div>
+              <p className="text-lg font-medium text-gray-700 mb-2">No complaints to review</p>
+              <p className="text-gray-500">All students are happy! Keep up the great work.</p>
+            </div>
           ) : (
             complaints.map((complaint) => (
-              <div key={complaint.id} className="border rounded-lg p-4 space-y-4">
+              <div key={complaint.id} className="border rounded-lg p-6 space-y-4 bg-white shadow-sm">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <Badge variant={getStatusColor(complaint.status)}>
-                        {complaint.status}
+                        {complaint.status.replace('_', ' ')}
                       </Badge>
                       <Badge variant="outline">{complaint.category}</Badge>
                       <span className={`text-sm font-medium ${getPriorityColor(complaint.priority)}`}>
                         {complaint.priority} priority
                       </span>
                     </div>
-                    <h4 className="font-semibold text-lg">{complaint.title}</h4>
-                    <p className="text-gray-700 mt-2">{complaint.description}</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Submitted: {new Date(complaint.created_at).toLocaleDateString()}
+                    <h4 className="font-semibold text-lg mb-2">{complaint.title}</h4>
+                    <p className="text-gray-700 mb-3 leading-relaxed">{complaint.description}</p>
+                    <p className="text-sm text-gray-500">
+                      📅 Submitted: {formatDate(complaint.created_at)}
                     </p>
                     
                     {complaint.admin_response && (
-                      <div className="mt-3 p-3 bg-blue-50 rounded border-l-4 border-blue-500">
-                        <p className="text-sm font-medium text-blue-800">Admin Response:</p>
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <p className="text-sm font-medium text-blue-800 mb-1">Admin Response:</p>
                         <p className="text-sm text-blue-700">{complaint.admin_response}</p>
                       </div>
                     )}
@@ -99,7 +120,7 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
                 </div>
                 
                 {complaint.status !== 'resolved' && (
-                  <div className="space-y-3">
+                  <div className="space-y-3 border-t pt-4">
                     <Textarea
                       placeholder="Add response (optional)"
                       value={responses[complaint.id] || ''}
@@ -115,7 +136,7 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
                         <Button
                           size="sm"
                           onClick={() => handleStatusUpdate(complaint.id, 'in_progress')}
-                          className="bg-yellow-600 hover:bg-yellow-700"
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white"
                         >
                           🔄 Start Working
                         </Button>
@@ -128,9 +149,9 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
                           'resolved', 
                           responses[complaint.id]
                         )}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700 text-white"
                       >
-                        ✅ Resolve
+                        ✅ Mark as Resolved
                       </Button>
                     </div>
                   </div>
