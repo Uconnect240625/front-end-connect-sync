@@ -55,6 +55,13 @@ const HelpCenter = () => {
 
         console.log('Uploading file to path:', filePath);
 
+        // Check if bucket exists and is accessible
+        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+        console.log('Available buckets:', buckets);
+        if (bucketsError) {
+          console.error('Error listing buckets:', bucketsError);
+        }
+
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('complaint-files')
           .upload(filePath, formData.screenshot, {
@@ -66,9 +73,18 @@ const HelpCenter = () => {
           console.error('File upload error:', uploadError);
           console.error('Upload error details:', {
             message: uploadError.message,
-            stack: uploadError.stack
+            statusCode: uploadError.statusCode,
+            error: uploadError.error
           });
-          toast.error(`Failed to upload file: ${uploadError.message}`);
+          
+          // Try to get more specific error information
+          if (uploadError.message.includes('bucket')) {
+            toast.error('File storage not properly configured. Please contact admin.');
+          } else if (uploadError.message.includes('policy')) {
+            toast.error('You do not have permission to upload files. Please contact admin.');
+          } else {
+            toast.error(`Failed to upload file: ${uploadError.message}`);
+          }
           setLoading(false);
           return;
         }
@@ -111,7 +127,8 @@ const HelpCenter = () => {
         console.error('Insert error details:', {
           message: insertError.message,
           details: insertError.details,
-          hint: insertError.hint
+          hint: insertError.hint,
+          code: insertError.code
         });
         throw insertError;
       }

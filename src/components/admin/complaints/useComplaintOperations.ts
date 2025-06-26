@@ -53,9 +53,6 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
 
           if (deleteFileError) {
             console.error('Error deleting complaint file from storage:', deleteFileError);
-            console.error('File deletion error details:', {
-              message: deleteFileError.message
-            });
             // Continue with complaint deletion even if file deletion fails
           } else {
             console.log('Complaint file deleted successfully from storage');
@@ -69,25 +66,24 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
       // Delete the complaint from database
       console.log('Deleting complaint from database:', complaintId);
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('complaints')
         .delete()
-        .eq('id', complaintId)
-        .select();
+        .eq('id', complaintId);
 
       if (error) {
         console.error('Database deletion error:', error);
-        console.error('Deletion error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
         throw error;
       }
 
-      console.log('Complaint deleted successfully from database:', data);
+      console.log('Complaint deleted successfully from database');
       toast.success('Complaint deleted successfully');
-      onComplaintUpdate();
+      
+      // Force a refresh by calling the update function
+      setTimeout(() => {
+        onComplaintUpdate();
+      }, 500);
+      
     } catch (error) {
       console.error('Error deleting complaint:', error);
       toast.error('Failed to delete complaint');
