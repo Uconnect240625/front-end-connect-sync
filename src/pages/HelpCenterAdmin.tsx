@@ -41,14 +41,20 @@ const HelpCenterAdmin = () => {
   const loadComplaints = async () => {
     try {
       setLoading(true);
+      console.log('Loading complaints for university:', profile?.university_id);
+      
       const { data, error } = await supabase
         .from('complaints')
         .select('*')
         .eq('university_id', profile?.university_id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading complaints:', error);
+        throw error;
+      }
       
+      console.log('Loaded complaints:', data);
       setComplaints(data || []);
     } catch (error) {
       console.error('Error loading complaints:', error);
@@ -81,6 +87,7 @@ const HelpCenterAdmin = () => {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-red-600 mb-4">Help Center Admin</h1>
           <p className="text-gray-600">Manage and resolve student complaints and issues</p>
+          <p className="text-sm text-gray-500 mt-2">Total complaints: {complaints.length}</p>
         </div>
 
         <ComplaintsManager 

@@ -17,11 +17,11 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
 
       if (error) throw error;
 
-      toast.success('Complaint updated successfully');
+      toast.success('Complaint status updated successfully');
       onComplaintUpdate();
     } catch (error) {
       console.error('Error updating complaint:', error);
-      toast.error('Failed to update complaint');
+      toast.error('Failed to update complaint status');
     }
   };
 
@@ -29,18 +29,27 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
     try {
       // Delete the file from storage if it exists
       if (fileUrl) {
-        // Extract the file path from the URL
-        const urlParts = fileUrl.split('/');
-        const fileName = urlParts[urlParts.length - 1];
-        const filePath = `complaints/${fileName}`;
+        try {
+          // Extract the file path from the URL
+          const urlParts = fileUrl.split('/');
+          const fileName = urlParts[urlParts.length - 1];
+          const filePath = `complaints/${fileName}`;
 
-        const { error: deleteFileError } = await supabase.storage
-          .from('complaint-files')
-          .remove([filePath]);
+          console.log('Attempting to delete file:', filePath);
 
-        if (deleteFileError) {
-          console.error('Error deleting file:', deleteFileError);
-          // Continue with complaint deletion even if file deletion fails
+          const { error: deleteFileError } = await supabase.storage
+            .from('complaint-files')
+            .remove([filePath]);
+
+          if (deleteFileError) {
+            console.error('Error deleting file from storage:', deleteFileError);
+            // Continue with complaint deletion even if file deletion fails
+          } else {
+            console.log('File deleted successfully from storage');
+          }
+        } catch (fileError) {
+          console.error('Error processing file deletion:', fileError);
+          // Continue with complaint deletion
         }
       }
 
@@ -62,17 +71,25 @@ export const useComplaintOperations = (onComplaintUpdate: () => void) => {
 
   const handleDownloadFile = async (fileUrl: string, fileName: string) => {
     try {
+      console.log('Downloading file from URL:', fileUrl);
+      
       const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${response.statusText}`);
+      }
+      
       const blob = await response.blob();
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = fileName || 'complaint-file';
+      link.download = fileName || 'complaint-attachment';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
+      toast.success('File downloaded successfully');
     } catch (error) {
       console.error('Error downloading file:', error);
       toast.error('Failed to download file');
