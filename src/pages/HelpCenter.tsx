@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -72,9 +73,7 @@ const HelpCenter = () => {
         if (uploadError) {
           console.error('File upload error:', uploadError);
           console.error('Upload error details:', {
-            message: uploadError.message,
-            statusCode: uploadError.statusCode,
-            error: uploadError.error
+            message: uploadError.message
           });
           
           // Try to get more specific error information
