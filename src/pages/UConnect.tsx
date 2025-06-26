@@ -12,7 +12,7 @@ const UConnect = () => {
     { name: 'Marketplace', icon: 'https://img.icons8.com/color/96/shopping-cart--v1.png', route: '/marketplace' },
     { name: 'Mess Menu', icon: 'https://img.icons8.com/color/96/restaurant.png', route: '/mess-menu' },
     { name: 'Events', icon: 'https://img.icons8.com/color/96/calendar--v1.png', route: '/events' },
-    { name: 'Help Center', icon: 'https://img.icons8.com/color/96/help.png', route: '/help' },
+    { name: 'Help Center', icon: 'https://img.icons8.com/color/96/help.png', route: '/help-center' },
   ];
 
   const openFeature = (route: string) => {

@@ -6,7 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Complaint, ComplaintStatus } from '@/types/database';
+
+interface Complaint {
+  id: string;
+  user_id: string;
+  university_id: string;
+  title: string;
+  category: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'resolved';
+  admin_response: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 interface ComplaintsManagerProps {
   complaints: Complaint[];
@@ -16,9 +28,13 @@ interface ComplaintsManagerProps {
 const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerProps) => {
   const [responses, setResponses] = React.useState<Record<string, string>>({});
 
-  const handleStatusUpdate = async (complaintId: string, status: ComplaintStatus, response?: string) => {
+  const handleStatusUpdate = async (complaintId: string, status: 'pending' | 'in_progress' | 'resolved', response?: string) => {
     try {
-      const updateData: any = { status };
+      const updateData: any = { 
+        status,
+        updated_at: new Date().toISOString()
+      };
+      
       if (response) {
         updateData.admin_response = response;
       }
@@ -39,7 +55,7 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
     }
   };
 
-  const getStatusColor = (status: ComplaintStatus) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'destructive';
       case 'in_progress': return 'default';
@@ -48,12 +64,12 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case 'high': return 'text-red-600';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Pending';
+      case 'in_progress': return 'In Progress';
+      case 'resolved': return 'Resolved';
+      default: return status;
     }
   };
 
@@ -76,12 +92,9 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant={getStatusColor(complaint.status)}>
-                        {complaint.status}
+                        {getStatusLabel(complaint.status)}
                       </Badge>
                       <Badge variant="outline">{complaint.category}</Badge>
-                      <span className={`text-sm font-medium ${getPriorityColor(complaint.priority)}`}>
-                        {complaint.priority} priority
-                      </span>
                     </div>
                     <h4 className="font-semibold text-lg">{complaint.title}</h4>
                     <p className="text-gray-700 mt-2">{complaint.description}</p>
@@ -130,7 +143,7 @@ const ComplaintsManager = ({ complaints, onComplaintUpdate }: ComplaintsManagerP
                         )}
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        ✅ Resolve
+                        ✅ Mark as Resolved
                       </Button>
                     </div>
                   </div>

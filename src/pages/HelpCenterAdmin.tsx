@@ -6,7 +6,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { Complaint } from '@/types/database';
+
+interface Complaint {
+  id: string;
+  user_id: string;
+  university_id: string;
+  title: string;
+  category: string;
+  description: text;
+  status: 'pending' | 'in_progress' | 'resolved';
+  admin_response: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 const HelpCenterAdmin = () => {
   const { profile } = useAuth();
@@ -37,36 +49,12 @@ const HelpCenterAdmin = () => {
 
       if (error) throw error;
       
-      // Map the data to ensure proper status mapping and provide default priority
-      const mappedComplaints = (data || []).map(complaint => ({
-        ...complaint,
-        priority: 'medium' as const, // Always set default since priority doesn't exist in DB
-        // Map database status values to our TypeScript enum
-        status: mapDatabaseStatusToComplaintStatus(complaint.status as string)
-      }));
-      
-      setComplaints(mappedComplaints);
+      setComplaints(data || []);
     } catch (error) {
       console.error('Error loading complaints:', error);
       toast.error('Failed to load complaints');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Helper function to map database status to our TypeScript enum
-  const mapDatabaseStatusToComplaintStatus = (dbStatus: string): Complaint['status'] => {
-    switch (dbStatus) {
-      case 'open':
-      case 'pending':
-        return 'pending';
-      case 'in_progress':
-        return 'in_progress';
-      case 'closed':
-      case 'resolved':
-        return 'resolved';
-      default:
-        return 'pending';
     }
   };
 
