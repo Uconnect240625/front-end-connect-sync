@@ -96,24 +96,24 @@ const ManageAnnouncements = () => {
   };
 
   const getBadgeColor = (type: string) => {
-    return type === 'Official' ? 'bg-red-100 text-red-800' : 'bg-red-100 text-red-800';
+    return type === 'Official' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center py-8">Loading announcements...</div>
+          <div className="text-center py-8 text-muted-foreground">Loading announcements...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Manage Announcements</h1>
+          <h1 className="text-3xl font-bold text-foreground">Manage Announcements</h1>
           <Button onClick={() => navigate('/announcements/create')} className="flex items-center gap-2">
             <Plus size={20} />
             New Announcement
@@ -121,24 +121,24 @@ const ManageAnnouncements = () => {
         </div>
 
         {announcements.length === 0 ? (
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="text-center py-8">
-              <p className="text-gray-600">No announcements found. Create your first announcement!</p>
+              <p className="text-muted-foreground">No announcements found. Create your first announcement!</p>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-4">
             {announcements.map((announcement) => (
-              <Card key={announcement.id}>
+              <Card key={announcement.id} className="bg-card border-border">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">{announcement.title}</CardTitle>
+                      <CardTitle className="text-lg text-card-foreground">{announcement.title}</CardTitle>
                       <div className="flex gap-2 mt-2">
                         <Badge className={getBadgeColor(announcement.type)}>
                           {announcement.type}
                         </Badge>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="border-border text-muted-foreground">
                           {announcement.category}
                         </Badge>
                       </div>
@@ -155,8 +155,8 @@ const ManageAnnouncements = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-3">{announcement.content}</p>
-                  <span className="text-sm text-gray-500">
+                  <p className="text-muted-foreground mb-3">{announcement.content}</p>
+                  <span className="text-sm text-muted-foreground">
                     📅 {formatDate(announcement.created_at)}
                   </span>
                 </CardContent>
@@ -166,7 +166,7 @@ const ManageAnnouncements = () => {
         )}
 
         <div className="mt-6 text-center">
-          <Button variant="outline" onClick={() => navigate('/announcements')}>
+          <Button variant="outline" onClick={() => navigate('/announcements')} className="border-border hover:bg-accent hover:text-accent-foreground">
             ← Back to Announcements
           </Button>
         </div>
