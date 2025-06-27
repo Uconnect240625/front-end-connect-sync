@@ -16,7 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const announcementSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  type: z.enum(['Official', 'Student']),
+  type: z.enum(['official', 'student']),
   category: z.string().min(1, 'Category is required'),
   content: z.string().min(1, 'Content is required'),
 });
@@ -32,7 +32,7 @@ const AnnouncementForm = () => {
     resolver: zodResolver(announcementSchema),
     defaultValues: {
       title: '',
-      type: 'Official',
+      type: 'official',
       category: '',
       content: '',
     },
@@ -47,6 +47,10 @@ const AnnouncementForm = () => {
       });
       return;
     }
+
+    console.log('Submitting announcement with data:', data);
+    console.log('User ID:', user.id);
+    console.log('Profile:', profile);
 
     try {
       const { error } = await supabase
@@ -123,8 +127,8 @@ const AnnouncementForm = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Official">🏛️ Official</SelectItem>
-                          <SelectItem value="Student">🎓 Student</SelectItem>
+                          <SelectItem value="official">🏛️ Official</SelectItem>
+                          <SelectItem value="student">🎓 Student</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
