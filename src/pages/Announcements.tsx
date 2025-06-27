@@ -84,22 +84,22 @@ const Announcements = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center py-8">Loading announcements...</div>
+          <div className="text-center py-8 text-foreground">Loading announcements...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-2xl mx-auto">
         <header className="text-center mb-6">
           <div className="flex justify-between items-center mb-4">
             <button 
               onClick={() => navigate('/uconnect')}
-              className="text-blue-600 hover:text-blue-800"
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               ← Back to U Connect
             </button>
@@ -123,15 +123,15 @@ const Announcements = () => {
               </div>
             )}
           </div>
-          <h2 className="text-2xl font-semibold">📣 Announcements</h2>
+          <h2 className="text-2xl font-semibold text-foreground">📣 Announcements</h2>
         </header>
 
         <div className="flex justify-center gap-4 mb-6">
           <button
             className={`px-6 py-3 rounded-full font-medium transition-all ${
               activeTab === 'official'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-blue-600 text-white dark:bg-blue-500'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
             onClick={() => setActiveTab('official')}
           >
@@ -140,8 +140,8 @@ const Announcements = () => {
           <button
             className={`px-6 py-3 rounded-full font-medium transition-all ${
               activeTab === 'student'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-blue-600 text-white dark:bg-blue-500'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
             onClick={() => setActiveTab('student')}
           >
@@ -153,18 +153,18 @@ const Announcements = () => {
           {filteredAnnouncements.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
-                <p className="text-gray-600">No {activeTab.toLowerCase()} announcements found.</p>
+                <p className="text-muted-foreground">No {activeTab.toLowerCase()} announcements found.</p>
               </CardContent>
             </Card>
           ) : (
             filteredAnnouncements.map((announcement) => (
-              <Card key={announcement.id} className="bg-white rounded-xl p-6 shadow-sm transition-transform hover:scale-105">
-                <h3 className="font-semibold text-lg mb-2">{announcement.title}</h3>
+              <Card key={announcement.id} className="bg-card rounded-xl p-6 shadow-sm transition-transform hover:scale-105">
+                <h3 className="font-semibold text-lg mb-2 text-card-foreground">{announcement.title}</h3>
                 <Badge className={getBadgeColor(announcement.category)} variant="secondary">
                   {announcement.category}
                 </Badge>
-                <p className="text-gray-600 mb-3 mt-3">{announcement.content}</p>
-                <span className="text-sm text-gray-500">📅 {formatDate(announcement.created_at)}</span>
+                <p className="text-muted-foreground mb-3 mt-3">{announcement.content}</p>
+                <span className="text-sm text-muted-foreground">📅 {formatDate(announcement.created_at)}</span>
               </Card>
             ))
           )}
