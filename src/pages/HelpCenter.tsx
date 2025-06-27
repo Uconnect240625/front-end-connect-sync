@@ -40,12 +40,12 @@ const HelpCenter = () => {
       const { error } = await supabase
         .from('complaints')
         .insert({
-          student_name: formData.studentName,
           category: formData.category,
           title: formData.title,
           description: formData.description,
           university_id: profile.university_id,
-          status: 'pending'
+          user_id: profile.id,
+          status: 'open'
         });
 
       if (error) throw error;

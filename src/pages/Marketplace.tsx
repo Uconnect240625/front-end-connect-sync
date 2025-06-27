@@ -12,12 +12,12 @@ interface Product {
   id: string;
   title: string;
   price: number;
-  seller_name: string;
-  seller_contact: string;
   description: string;
   image_url?: string;
   category: string;
   created_at: string;
+  contact_phone?: string;
+  user_id: string;
 }
 
 const Marketplace = () => {
@@ -38,10 +38,10 @@ const Marketplace = () => {
 
     try {
       const { data, error } = await supabase
-        .from('marketplace_products')
+        .from('marketplace_items')
         .select('*')
         .eq('university_id', profile.university_id)
-        .eq('status', 'approved')
+        .eq('approval_status', 'approved')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -136,17 +136,15 @@ const Marketplace = () => {
                   <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
                   
                   <div className="border-t border-border pt-3">
-                    <p className="text-sm font-medium text-card-foreground">{product.seller_name}</p>
-                    <p className="text-sm text-muted-foreground">{product.seller_contact}</p>
+                    <p className="text-sm text-muted-foreground">{product.contact_phone || 'Contact via app'}</p>
                   </div>
                   
                   <Button 
                     className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => {
-                      // Handle contact seller
                       toast({
                         title: "Contact Information",
-                        description: `Contact ${product.seller_name} at ${product.seller_contact}`,
+                        description: `Contact seller at ${product.contact_phone || 'Contact via app'}`,
                       });
                     }}
                   >

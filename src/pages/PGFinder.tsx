@@ -11,24 +11,12 @@ import Navigation from '@/components/Navigation';
 
 interface PGListing {
   id: string;
-  name: string;
+  title: string;
   location: string;
   price: number;
-  sharing_type: string;
-  facilities: string;
-  contact_number: string;
-  owner_name: string;
-  created_at: string;
-}
-
-interface RoommateRequest {
-  id: string;
-  requester_name: string;
-  gender: string;
-  budget: number;
-  location: string;
-  preferences: string;
-  contact_number: string;
+  type: string;
+  description: string;
+  contact_phone: string;
   created_at: string;
 }
 
@@ -37,7 +25,6 @@ const PGFinder = () => {
   const { toast } = useToast();
   const { profile } = useAuth();
   const [pgListings, setPgListings] = useState<PGListing[]>([]);
-  const [roommateRequests, setRoommateRequests] = useState<RoommateRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,26 +37,16 @@ const PGFinder = () => {
     if (!profile?.university_id) return;
 
     try {
-      const [pgResponse, roommateResponse] = await Promise.all([
-        supabase
-          .from('pg_listings')
-          .select('*')
-          .eq('university_id', profile.university_id)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('roommate_requests')
-          .select('*')
-          .eq('university_id', profile.university_id)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-      ]);
+      const { data: pgResponse, error: pgError } = await supabase
+        .from('pg_listings')
+        .select('*')
+        .eq('university_id', profile.university_id)
+        .eq('approval_status', 'approved')
+        .order('created_at', { ascending: false });
 
-      if (pgResponse.error) throw pgResponse.error;
-      if (roommateResponse.error) throw roommateResponse.error;
+      if (pgError) throw pgError;
 
-      setPgListings(pgResponse.data || []);
-      setRoommateRequests(roommateResponse.data || []);
+      setPgListings(pgResponse || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
@@ -132,16 +109,6 @@ const PGFinder = () => {
           </TabsList>
 
           <TabsContent value="pg-listings" className="mt-6">
-            <div className="flex justify-end mb-4">
-              <Button 
-                onClick={() => navigate('/post-roommate-request')}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Plus size={16} className="mr-1" />
-                Post Request
-              </Button>
-            </div>
-
             {pgListings.length === 0 ? (
               <div className="text-center py-12 bg-card rounded-xl border border-border">
                 <div className="text-6xl mb-4">🏠</div>
@@ -153,17 +120,16 @@ const PGFinder = () => {
                 {pgListings.map((pg) => (
                   <div key={pg.id} className="bg-card rounded-xl shadow-lg p-6 border border-border hover:shadow-xl transition-shadow">
                     <div className="flex items-start justify-between mb-4">
-                      <h3 className="font-semibold text-lg text-card-foreground">{pg.name}</h3>
+                      <h3 className="font-semibold text-lg text-card-foreground">{pg.title}</h3>
                       <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">PG Listing</span>
                     </div>
                     
                     <div className="space-y-2 text-sm">
                       <p><strong className="text-card-foreground">Location:</strong> <span className="text-muted-foreground">{pg.location}</span></p>
                       <p><strong className="text-card-foreground">Price:</strong> <span className="text-green-600 font-semibold">{formatPrice(pg.price)}/month</span></p>
-                      <p><strong className="text-card-foreground">Type:</strong> <span className="text-muted-foreground">{pg.sharing_type}</span></p>
-                      <p><strong className="text-card-foreground">Facilities:</strong> <span className="text-muted-foreground">{pg.facilities}</span></p>
-                      <p><strong className="text-card-foreground">Owner:</strong> <span className="text-muted-foreground">{pg.owner_name}</span></p>
-                      <p><strong className="text-card-foreground">Contact:</strong> <span className="text-muted-foreground">{pg.contact_number}</span></p>
+                      <p><strong className="text-card-foreground">Type:</strong> <span className="text-muted-foreground">{pg.type}</span></p>
+                      <p><strong className="text-card-foreground">Description:</strong> <span className="text-muted-foreground">{pg.description}</span></p>
+                      <p><strong className="text-card-foreground">Contact:</strong> <span className="text-muted-foreground">{pg.contact_phone}</span></p>
                     </div>
                     
                     <Button 
@@ -171,7 +137,7 @@ const PGFinder = () => {
                       onClick={() => {
                         toast({
                           title: "Contact Information",
-                          description: `Contact ${pg.owner_name} at ${pg.contact_number}`,
+                          description: `Contact owner at ${pg.contact_phone}`,
                         });
                       }}
                     >
@@ -184,55 +150,11 @@ const PGFinder = () => {
           </TabsContent>
 
           <TabsContent value="roommate-requests" className="mt-6">
-            <div className="flex justify-end mb-4">
-              <Button 
-                onClick={() => navigate('/post-roommate-request')}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Plus size={16} className="mr-1" />
-                Post Request
-              </Button>
+            <div className="text-center py-12 bg-card rounded-xl border border-border">
+              <div className="text-6xl mb-4">🧑‍🤝‍🧑</div>
+              <h3 className="text-xl font-semibold text-card-foreground mb-2">Roommate Requests Coming Soon</h3>
+              <p className="text-muted-foreground">This feature will be available soon!</p>
             </div>
-
-            {roommateRequests.length === 0 ? (
-              <div className="text-center py-12 bg-card rounded-xl border border-border">
-                <div className="text-6xl mb-4">🧑‍🤝‍🧑</div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-2">No Roommate Requests</h3>
-                <p className="text-muted-foreground">Be the first to post a roommate request!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {roommateRequests.map((request) => (
-                  <div key={request.id} className="bg-card rounded-xl shadow-lg p-6 border border-border hover:shadow-xl transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="font-semibold text-lg text-card-foreground">🧑‍🤝‍🧑 Roommate Needed</h3>
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Roommate Request</span>
-                    </div>
-                    
-                    <div className="space-y-2 text-sm">
-                      <p><strong className="text-card-foreground">From:</strong> <span className="text-muted-foreground">{request.requester_name}</span></p>
-                      <p><strong className="text-card-foreground">Gender:</strong> <span className="text-muted-foreground capitalize">{request.gender}</span></p>
-                      <p><strong className="text-card-foreground">Budget:</strong> <span className="text-green-600 font-semibold">{formatPrice(request.budget)}/month</span></p>
-                      <p><strong className="text-card-foreground">Location:</strong> <span className="text-muted-foreground">{request.location}</span></p>
-                      <p><strong className="text-card-foreground">Preferences:</strong> <span className="text-muted-foreground">{request.preferences || 'None specified'}</span></p>
-                      <p><strong className="text-card-foreground">Contact:</strong> <span className="text-muted-foreground">{request.contact_number}</span></p>
-                    </div>
-                    
-                    <Button 
-                      className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white"
-                      onClick={() => {
-                        toast({
-                          title: "Contact Information",
-                          description: `Contact ${request.requester_name} at ${request.contact_number}`,
-                        });
-                      }}
-                    >
-                      Contact Person
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
           </TabsContent>
         </Tabs>
       </div>

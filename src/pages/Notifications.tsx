@@ -14,7 +14,8 @@ interface Announcement {
   content: string;
   type: string;
   created_at: string;
-  author_name: string;
+  category?: string;
+  user_id: string;
 }
 
 const Notifications = () => {
