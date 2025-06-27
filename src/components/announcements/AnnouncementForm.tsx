@@ -1,33 +1,44 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+
+const announcementSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  type: z.enum(['Official', 'Student']),
+  category: z.string().min(1, 'Category is required'),
+  content: z.string().min(1, 'Content is required'),
+});
+
+type AnnouncementFormData = z.infer<typeof announcementSchema>;
 
 const AnnouncementForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, profile } = useAuth();
-  
-  const [formData, setFormData] = useState({
-    title: '',
-    type: '',
-    category: '',
-    content: ''
-  });
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const form = useForm<AnnouncementFormData>({
+    resolver: zodResolver(announcementSchema),
+    defaultValues: {
+      title: '',
+      type: 'Official',
+      category: '',
+      content: '',
+    },
+  });
+
+  const onSubmit = async (data: AnnouncementFormData) => {
     if (!user || !profile) {
       toast({
         title: "Error",
@@ -37,56 +48,23 @@ const AnnouncementForm = () => {
       return;
     }
 
-    if (!formData.title || !formData.type || !formData.category || !formData.content) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check permissions
-    const canCreateOfficial = profile.role === 'admin';
-    const canCreateStudent = profile.role === 'admin' || profile.role === 'club';
-    
-    if (formData.type === 'Official' && !canCreateOfficial) {
-      toast({
-        title: "Error",
-        description: "Only admins can create official announcements",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (formData.type === 'Student' && !canCreateStudent) {
-      toast({
-        title: "Error",
-        description: "Only admins and clubs can create student announcements",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
     try {
       const { error } = await supabase
         .from('announcements')
-        .insert([{
-          title: formData.title,
-          type: formData.type,
-          category: formData.category,
-          content: formData.content,
+        .insert({
+          title: data.title,
+          type: data.type,
+          category: data.category,
+          content: data.content,
           user_id: user.id,
-          university_id: profile.university_id
-        }]);
+          university_id: profile.university_id,
+        });
 
       if (error) {
         console.error('Error creating announcement:', error);
         toast({
           title: "Error",
-          description: "Failed to create announcement. Please try again.",
+          description: "Failed to create announcement",
           variant: "destructive"
         });
         return;
@@ -94,7 +72,7 @@ const AnnouncementForm = () => {
 
       toast({
         title: "Success",
-        description: "Announcement created successfully!"
+        description: "Announcement created successfully"
       });
 
       navigate('/announcements');
@@ -102,19 +80,10 @@ const AnnouncementForm = () => {
       console.error('Error creating announcement:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "Failed to create announcement",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
   };
 
   return (
@@ -123,75 +92,106 @@ const AnnouncementForm = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Create New Announcement</CardTitle>
-            <CardDescription>
-              Share important updates with the university community
-            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Enter announcement title"
-                  required
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter announcement title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="type">Type *</Label>
-                <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select announcement type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Official">🏛️ Official</SelectItem>
-                    <SelectItem value="Student">🎓 Student</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Exams">Exams</SelectItem>
-                    <SelectItem value="Holiday">Holiday</SelectItem>
-                    <SelectItem value="Club Event">Club Event</SelectItem>
-                    <SelectItem value="Lost & Found">Lost & Found</SelectItem>
-                    <SelectItem value="Academics">Academics</SelectItem>
-                    <SelectItem value="Emergency">Emergency</SelectItem>
-                    <SelectItem value="General">General</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">Description *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => handleInputChange('content', e.target.value)}
-                  placeholder="Enter announcement description..."
-                  rows={5}
-                  required
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select announcement type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Official">🏛️ Official</SelectItem>
+                          <SelectItem value="Student">🎓 Student</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div className="flex gap-4">
-                <Button type="submit" disabled={isSubmitting} className="flex-1">
-                  {isSubmitting ? 'Creating...' : 'Create Announcement'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => navigate('/announcements')}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Exams">📝 Exams</SelectItem>
+                          <SelectItem value="Holiday">🎉 Holiday</SelectItem>
+                          <SelectItem value="Club Event">🎭 Club Event</SelectItem>
+                          <SelectItem value="Lost & Found">🔍 Lost & Found</SelectItem>
+                          <SelectItem value="Academics">📚 Academics</SelectItem>
+                          <SelectItem value="Emergency">🚨 Emergency</SelectItem>
+                          <SelectItem value="General">📋 General</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Content</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter announcement content"
+                          className="min-h-[120px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-4">
+                  <Button type="submit" className="flex-1">
+                    Create Announcement
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('/announcements')}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>
