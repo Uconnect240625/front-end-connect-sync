@@ -91,11 +91,11 @@ const AnnouncementForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-2xl mx-auto">
-        <Card>
+        <Card className="bg-card">
           <CardHeader>
-            <CardTitle className="text-2xl">Create New Announcement</CardTitle>
+            <CardTitle className="text-2xl text-card-foreground">Create New Announcement</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -105,7 +105,7 @@ const AnnouncementForm = () => {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Title</FormLabel>
+                      <FormLabel className="text-card-foreground">Title</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter announcement title" {...field} />
                       </FormControl>
@@ -119,7 +119,7 @@ const AnnouncementForm = () => {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type</FormLabel>
+                      <FormLabel className="text-card-foreground">Type</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -141,7 +141,7 @@ const AnnouncementForm = () => {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel className="text-card-foreground">Category</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -168,7 +168,7 @@ const AnnouncementForm = () => {
                   name="content"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Content</FormLabel>
+                      <FormLabel className="text-card-foreground">Content</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Enter announcement content"

@@ -1,37 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useNavigate } from 'react-router-dom';
+import { useDarkMode } from '@/hooks/useDarkMode';
 
 const Settings = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const { signOut } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const isDark = localStorage.getItem('uconnectDarkMode') === 'true';
-    setDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('uconnectDarkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('uconnectDarkMode', 'false');
-    }
-  };
 
   const handleLogout = async () => {
     try {
