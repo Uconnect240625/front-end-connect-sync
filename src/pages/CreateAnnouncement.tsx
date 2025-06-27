@@ -3,6 +3,7 @@ import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import AnnouncementForm from '@/components/announcements/AnnouncementForm';
+import Navigation from '@/components/Navigation';
 
 const CreateAnnouncement = () => {
   const { user, profile } = useAuth();
@@ -16,7 +17,12 @@ const CreateAnnouncement = () => {
     return <Navigate to="/announcements" replace />;
   }
 
-  return <AnnouncementForm />;
+  return (
+    <>
+      <Navigation />
+      <AnnouncementForm />
+    </>
+  );
 };
 
 export default CreateAnnouncement;

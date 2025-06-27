@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +28,8 @@ import PostNotice from "./pages/PostNotice";
 import Settings from "./pages/Settings";
 import ProfilePage from "./pages/ProfilePage";
 import Notifications from "./pages/Notifications";
+import CreateAnnouncement from "./pages/CreateAnnouncement";
+import ManageAnnouncementsPage from "./pages/ManageAnnouncementsPage";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Announcements />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/announcements/create"
+              element={
+                <ProtectedRoute>
+                  <CreateAnnouncement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/announcements/manage"
+              element={
+                <ProtectedRoute>
+                  <ManageAnnouncementsPage />
                 </ProtectedRoute>
               }
             />

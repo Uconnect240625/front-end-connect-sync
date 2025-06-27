@@ -3,6 +3,7 @@ import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import ManageAnnouncements from '@/components/announcements/ManageAnnouncements';
+import Navigation from '@/components/Navigation';
 
 const ManageAnnouncementsPage = () => {
   const { user, profile } = useAuth();
@@ -16,7 +17,12 @@ const ManageAnnouncementsPage = () => {
     return <Navigate to="/announcements" replace />;
   }
 
-  return <ManageAnnouncements />;
+  return (
+    <>
+      <Navigation />
+      <ManageAnnouncements />
+    </>
+  );
 };
 
 export default ManageAnnouncementsPage;
