@@ -146,31 +146,31 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       
       <div className="max-w-7xl mx-auto pt-8 px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage university operations and approvals</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage university operations and approvals</p>
         </div>
 
         <AdminStats stats={stats} />
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {quickActions.map((action, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={action.action}>
+              <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow border-border bg-card" onClick={action.action}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-lg ${action.color} text-white`}>
                       <action.icon size={24} />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{action.title}</CardTitle>
-                      <CardDescription>{action.description}</CardDescription>
+                      <CardTitle className="text-lg text-card-foreground">{action.title}</CardTitle>
+                      <CardDescription className="text-muted-foreground">{action.description}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -180,9 +180,9 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="approvals" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="approvals">Pending Approvals ({stats.pendingApprovals})</TabsTrigger>
-            <TabsTrigger value="complaints">Complaints ({complaints.length})</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-muted">
+            <TabsTrigger value="approvals" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Pending Approvals ({stats.pendingApprovals})</TabsTrigger>
+            <TabsTrigger value="complaints" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Complaints ({complaints.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="approvals">
