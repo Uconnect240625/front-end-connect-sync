@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -171,8 +172,8 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4 light">
+      <Card className="w-full max-w-md bg-white border-gray-200 shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-blue-900">
             <span className="px-2 mx-1 rounded">U</span>Connect
@@ -181,34 +182,36 @@ export default function Auth() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+              <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">Login</TabsTrigger>
+              <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
+                  <Label htmlFor="login-email" className="text-gray-700">Email</Label>
                   <Input
                     id="login-email"
                     type="email"
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
                     required
+                    className="bg-white border-gray-300 text-gray-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                  <Label htmlFor="login-password" className="text-gray-700">Password</Label>
                   <Input
                     id="login-password"
                     type="password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     required
+                    className="bg-white border-gray-300 text-gray-900"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
                   {loading ? 'Logging in...' : 'Login'}
                 </Button>
               </form>
@@ -217,7 +220,7 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="full-name">Full Name</Label>
+                  <Label htmlFor="full-name" className="text-gray-700">Full Name</Label>
                   <Input
                     id="full-name"
                     type="text"
@@ -225,10 +228,11 @@ export default function Auth() {
                     onChange={(e) => setFullName(e.target.value)}
                     required
                     placeholder="Enter your full name"
+                    className="bg-white border-gray-300 text-gray-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email" className="text-gray-700">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -236,10 +240,11 @@ export default function Auth() {
                     onChange={(e) => setSignupEmail(e.target.value)}
                     required
                     placeholder="Enter your email address"
+                    className="bg-white border-gray-300 text-gray-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password" className="text-gray-700">Password</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -248,37 +253,38 @@ export default function Auth() {
                     required
                     placeholder="Choose a secure password (min 6 characters)"
                     minLength={6}
+                    className="bg-white border-gray-300 text-gray-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role" className="text-gray-700">Role</Label>
                   <Select value={role} onValueChange={setRole} required>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="club">Club</SelectItem>
+                    <SelectContent className="bg-white border-gray-300">
+                      <SelectItem value="student" className="text-gray-900">Student</SelectItem>
+                      <SelectItem value="admin" className="text-gray-900">Admin</SelectItem>
+                      <SelectItem value="club" className="text-gray-900">Club</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="university">University</Label>
+                  <Label htmlFor="university" className="text-gray-700">University</Label>
                   <Select value={universityId} onValueChange={setUniversityId} required>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                       <SelectValue placeholder="Select your university" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white border-gray-300">
                       {universities.map((uni) => (
-                        <SelectItem key={uni.id} value={uni.id}>
+                        <SelectItem key={uni.id} value={uni.id} className="text-gray-900">
                           {uni.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>
