@@ -22,7 +22,7 @@ const Announcements = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('Official');
+  const [activeTab, setActiveTab] = useState('official');
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,7 +77,7 @@ const Announcements = () => {
   };
 
   const filteredAnnouncements = announcements.filter(announcement => 
-    announcement.type === activeTab
+    announcement.type === activeTab.toLowerCase()
   );
 
   const canManage = profile && (profile.role === 'admin' || profile.role === 'club');
@@ -129,21 +129,21 @@ const Announcements = () => {
         <div className="flex justify-center gap-4 mb-6">
           <button
             className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === 'Official'
+              activeTab === 'official'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
-            onClick={() => setActiveTab('Official')}
+            onClick={() => setActiveTab('official')}
           >
             🏛️ Official
           </button>
           <button
             className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === 'Student'
+              activeTab === 'student'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
-            onClick={() => setActiveTab('Student')}
+            onClick={() => setActiveTab('student')}
           >
             🎓 Student
           </button>
