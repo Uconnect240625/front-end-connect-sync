@@ -20,23 +20,23 @@ const UConnect = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="min-h-screen bg-background">
       <Navigation />
       
       <div className="flex justify-center items-center py-8">
         <div className="w-full max-w-lg p-8">
           <header className="text-center mb-8">
-            <h1 className="text-4xl font-semibold text-black mb-2">
+            <h1 className="text-4xl font-semibold text-foreground mb-2">
               Welcome to <span className="px-1 mx-1 rounded">U</span>Connect
             </h1>
-            <p className="text-gray-600">Your Campus in One App</p>
+            <p className="text-muted-foreground">Your Campus in One App</p>
           </header>
 
           <section className="grid grid-cols-2 gap-5">
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="bg-white/90 rounded-2xl p-4 text-center shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-blue-50 cursor-pointer"
+                className="bg-card rounded-2xl p-4 text-center shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-accent cursor-pointer border border-border"
                 onClick={() => openFeature(feature.route)}
               >
                 <img 
@@ -44,7 +44,7 @@ const UConnect = () => {
                   alt={feature.name} 
                   className="w-12 h-12 mx-auto mb-3"
                 />
-                <span className="block font-semibold text-blue-900">{feature.name}</span>
+                <span className="block font-semibold text-card-foreground">{feature.name}</span>
               </div>
             ))}
           </section>
@@ -98,7 +98,7 @@ const UConnect = () => {
           </div>
 
           <footer className="text-center mt-8">
-            <p className="text-sm text-gray-500">© 2025 UConnect. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">© 2025 UConnect. All rights reserved.</p>
           </footer>
         </div>
       </div>
