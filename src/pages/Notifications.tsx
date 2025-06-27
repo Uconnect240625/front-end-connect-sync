@@ -1,124 +1,131 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { ArrowLeft, Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
-import { Bell } from 'lucide-react';
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  type: string;
+  created_at: string;
+  author_name: string;
+}
 
 const Notifications = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { profile } = useAuth();
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
 
   const filters = ['All', 'Official', 'Clubs', 'Hostel', 'Academics', 'Emergency'];
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'Class Suspension Notice',
-      message: 'All classes are suspended tomorrow due to heavy rainfall.',
-      type: 'Official',
-      date: 'June 17, 2025'
-    },
-    {
-      id: 2,
-      title: 'Photography Club Event',
-      message: 'Join the flash walk on 18th June! Register now.',
-      type: 'Clubs',
-      date: 'June 16, 2025'
-    },
-    {
-      id: 3,
-      title: 'Urgent: Power Cut Alert',
-      message: 'Power will be cut in Block D from 2PM–4PM today.',
-      type: 'Emergency',
-      date: 'June 16, 2025'
-    },
-    {
-      id: 4,
-      title: 'Hostel Maintenance',
-      message: 'Water supply will be interrupted in Block A from 6AM-8AM tomorrow.',
-      type: 'Hostel',
-      date: 'June 15, 2025'
-    },
-    {
-      id: 5,
-      title: 'Assignment Deadline Extended',
-      message: 'Computer Networks assignment deadline extended to June 20th.',
-      type: 'Academics',
-      date: 'June 14, 2025'
+  useEffect(() => {
+    if (profile?.university_id) {
+      fetchAnnouncements();
     }
-  ];
+  }, [profile?.university_id]);
 
-  const filteredNotifications = activeFilter === 'All' 
-    ? notifications 
-    : notifications.filter(notification => notification.type === activeFilter);
+  const fetchAnnouncements = async () => {
+    if (!profile?.university_id) return;
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'Official':
-        return 'bg-blue-100 text-blue-800';
-      case 'Clubs':
-        return 'bg-purple-100 text-purple-800';
-      case 'Hostel':
-        return 'bg-green-100 text-green-800';
-      case 'Academics':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Emergency':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+    try {
+      const { data, error } = await supabase
+        .from('announcements')
+        .select('*')
+        .eq('university_id', profile.university_id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAnnouncements(data || []);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch notifications",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
+  const filteredAnnouncements = announcements.filter(announcement => 
+    activeFilter === 'All' || announcement.type === activeFilter
+  );
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading notifications...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       
-      <div className="max-w-2xl mx-auto pt-8 px-4">
-        <div className="bg-red-600 text-white p-4 rounded-t-lg text-center">
-          <div className="flex items-center justify-center space-x-2">
-            <Bell size={20} />
-            <h1 className="text-xl font-bold">Notifications</h1>
+      <div className="max-w-4xl mx-auto pt-20">
+        <div className="bg-red-600 text-white p-4 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <Bell size={24} />
+            <h1 className="text-xl font-bold">🔔 Notifications</h1>
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <div className="bg-white border-b border-gray-200 p-4">
-          <div className="flex gap-2 overflow-x-auto">
-            {filters.map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeFilter === filter
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
+        <div className="flex overflow-x-auto p-3 bg-card border-b border-border gap-2">
+          {filters.map((filter) => (
+            <Button
+              key={filter}
+              variant={activeFilter === filter ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveFilter(filter)}
+              className={`whitespace-nowrap ${
+                activeFilter === filter 
+                  ? 'bg-red-600 text-white hover:bg-red-700' 
+                  : 'bg-muted hover:bg-accent'
+              }`}
+            >
+              {filter}
+            </Button>
+          ))}
         </div>
 
-        {/* Notifications List */}
-        <div className="bg-white rounded-b-lg shadow-sm">
-          {filteredNotifications.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <Bell size={48} className="mx-auto mb-4 text-gray-300" />
-              <p>No notifications found for the selected filter.</p>
+        <div className="p-4">
+          {filteredAnnouncements.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📢</div>
+              <h3 className="text-xl font-semibold text-card-foreground mb-2">No Notifications</h3>
+              <p className="text-muted-foreground">No {activeFilter.toLowerCase()} notifications available</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
-              {filteredNotifications.map((notification) => (
-                <div key={notification.id} className="p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-gray-900 text-lg">
-                      {notification.title}
-                    </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}>
-                      {notification.type}
-                    </span>
+            <div className="space-y-4">
+              {filteredAnnouncements.map((announcement) => (
+                <div key={announcement.id} className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                  <h3 className="font-semibold text-lg text-red-600 mb-2">{announcement.title}</h3>
+                  <p className="text-card-foreground mb-3">{announcement.content}</p>
+                  <div className="text-sm text-muted-foreground text-right">
+                    {formatDate(announcement.created_at)}
                   </div>
-                  <p className="text-gray-600 mb-2">{notification.message}</p>
-                  <p className="text-sm text-gray-400">{notification.date}</p>
                 </div>
               ))}
             </div>

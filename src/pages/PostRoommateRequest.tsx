@@ -1,145 +1,182 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { ArrowLeft, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Navigation from '@/components/Navigation';
 
 const PostRoommateRequest = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { profile } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    year: '',
+    requesterName: profile?.full_name || '',
     gender: '',
     budget: '',
     location: '',
-    contact: '',
-    note: ''
+    preferences: '',
+    contactNumber: ''
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('✅ Roommate request submitted! It will be reviewed by admin.');
+    if (!profile?.university_id) {
+      toast({
+        title: "Error",
+        description: "Please log in to post a roommate request",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('roommate_requests')
+        .insert({
+          requester_name: formData.requesterName,
+          gender: formData.gender,
+          budget: parseInt(formData.budget),
+          location: formData.location,
+          preferences: formData.preferences,
+          contact_number: formData.contactNumber,
+          university_id: profile.university_id,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your roommate request has been submitted for approval",
+      });
+
+      navigate('/pg-finder');
+    } catch (error) {
+      console.error('Error submitting request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit roommate request",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
-      <div className="max-w-lg mx-auto pt-20 px-4">
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <h2 className="text-center text-2xl font-bold mb-6 text-gray-800">
-            Post Roommate Request
-          </h2>
+      
+      <div className="max-w-2xl mx-auto p-6 pt-20">
+        <button
+          onClick={() => navigate('/pg-finder')}
+          className="mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          Back to PG Finder
+        </button>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="bg-card rounded-xl shadow-lg p-8 border border-border">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Users className="text-blue-600" size={28} />
+            <h1 className="text-2xl font-bold text-card-foreground">Post Roommate Request</h1>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block font-semibold mb-2">Your Name</label>
-              <input 
-                type="text" 
-                id="name" 
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg" 
-                required 
+              <Label htmlFor="requesterName" className="text-card-foreground">👤 Full Name *</Label>
+              <Input
+                id="requesterName"
+                value={formData.requesterName}
+                onChange={(e) => setFormData({...formData, requesterName: e.target.value})}
+                placeholder="Enter your full name"
+                required
+                className="mt-1 bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <label htmlFor="year" className="block font-semibold mb-2">Year</label>
-              <select 
-                id="year" 
-                value={formData.year}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg" 
-                required
-              >
-                <option value="">Select Year</option>
-                <option value="1st">1st Year</option>
-                <option value="2nd">2nd Year</option>
-                <option value="3rd">3rd Year</option>
-                <option value="4th">4th Year</option>
-              </select>
+              <Label htmlFor="gender" className="text-card-foreground">⚧ Gender *</Label>
+              <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
+                <SelectTrigger className="mt-1 bg-background border-border text-foreground">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
-              <label htmlFor="gender" className="block font-semibold mb-2">Gender</label>
-              <select 
-                id="gender" 
-                value={formData.gender}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg" 
-                required
-              >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="budget" className="block font-semibold mb-2">Budget (₹/month)</label>
-              <input 
-                type="number" 
-                id="budget" 
+              <Label htmlFor="budget" className="text-card-foreground">💰 Budget (₹/month) *</Label>
+              <Input
+                id="budget"
+                type="number"
                 value={formData.budget}
-                onChange={handleInputChange}
+                onChange={(e) => setFormData({...formData, budget: e.target.value})}
                 placeholder="e.g., 6000"
-                className="w-full p-3 border border-gray-300 rounded-lg" 
-                required 
+                required
+                className="mt-1 bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <label htmlFor="location" className="block font-semibold mb-2">Preferred Location</label>
-              <input 
-                type="text" 
-                id="location" 
+              <Label htmlFor="location" className="text-card-foreground">📍 Preferred Location *</Label>
+              <Input
+                id="location"
                 value={formData.location}
-                onChange={handleInputChange}
-                placeholder="e.g., Near Gate 1"
-                className="w-full p-3 border border-gray-300 rounded-lg" 
-                required 
+                onChange={(e) => setFormData({...formData, location: e.target.value})}
+                placeholder="e.g., Near Gate 1, Sector 125"
+                required
+                className="mt-1 bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <label htmlFor="contact" className="block font-semibold mb-2">Contact Number</label>
-              <input 
-                type="tel" 
-                id="contact" 
-                value={formData.contact}
-                onChange={handleInputChange}
-                placeholder="+91 XXXXXXXXXX"
-                className="w-full p-3 border border-gray-300 rounded-lg" 
-                required 
+              <Label htmlFor="contactNumber" className="text-card-foreground">📞 Contact Number *</Label>
+              <Input
+                id="contactNumber"
+                value={formData.contactNumber}
+                onChange={(e) => setFormData({...formData, contactNumber: e.target.value})}
+                placeholder="Enter your contact number"
+                required
+                className="mt-1 bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <label htmlFor="note" className="block font-semibold mb-2">Additional Note</label>
-              <textarea 
-                id="note" 
-                value={formData.note}
-                onChange={handleInputChange}
-                placeholder="Any specific requirements..."
-                className="w-full p-3 border border-gray-300 rounded-lg h-20"
+              <Label htmlFor="preferences" className="text-card-foreground">📝 Additional Preferences</Label>
+              <Textarea
+                id="preferences"
+                value={formData.preferences}
+                onChange={(e) => setFormData({...formData, preferences: e.target.value})}
+                placeholder="e.g., Non-smoker, Vegetarian, Student preferred..."
+                className="mt-1 min-h-[100px] bg-background border-border text-foreground"
               />
             </div>
 
-            <button 
+            <Button 
               type="submit" 
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-red-600 transition-colors mt-6"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
             >
-              Submit Request
-            </button>
+              {loading ? 'Submitting...' : '🏠 Post Roommate Request'}
+            </Button>
           </form>
 
-          <p className="text-center text-sm text-gray-600 mt-4">
-            Your request will be reviewed and published after admin approval.
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Your request will be reviewed by admin before being published.
           </p>
         </div>
       </div>

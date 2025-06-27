@@ -1,271 +1,170 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Upload } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 const HelpCenter = () => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { toast } = useToast();
+  const { profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    studentName: '',
-    issueCategory: '',
-    issueTitle: '',
+    studentName: profile?.full_name || '',
+    category: '',
+    title: '',
     description: '',
     screenshot: null as File | null
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user || !profile) {
-      toast.error('Please log in to submit a complaint');
-      return;
-    }
-
-    if (!formData.studentName || !formData.issueCategory || !formData.issueTitle || !formData.description) {
-      toast.error('Please fill in all required fields.');
+    if (!profile?.university_id) {
+      toast({
+        title: "Error",
+        description: "Please log in to submit a complaint",
+        variant: "destructive"
+      });
       return;
     }
 
     setLoading(true);
-    
     try {
-      let fileUrl = null;
-
-      // Upload file if provided
-      if (formData.screenshot) {
-        console.log('Starting file upload for complaint...');
-        console.log('File details:', {
-          name: formData.screenshot.name,
-          size: formData.screenshot.size,
-          type: formData.screenshot.type
-        });
-        
-        const fileExt = formData.screenshot.name.split('.').pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-        const filePath = `complaints/${fileName}`;
-
-        console.log('Uploading file to path:', filePath);
-
-        // Check if bucket exists and is accessible
-        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-        console.log('Available buckets:', buckets);
-        if (bucketsError) {
-          console.error('Error listing buckets:', bucketsError);
-        }
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('complaint-files')
-          .upload(filePath, formData.screenshot, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (uploadError) {
-          console.error('File upload error:', uploadError);
-          console.error('Upload error details:', {
-            message: uploadError.message
-          });
-          
-          // Try to get more specific error information
-          if (uploadError.message.includes('bucket')) {
-            toast.error('File storage not properly configured. Please contact admin.');
-          } else if (uploadError.message.includes('policy')) {
-            toast.error('You do not have permission to upload files. Please contact admin.');
-          } else {
-            toast.error(`Failed to upload file: ${uploadError.message}`);
-          }
-          setLoading(false);
-          return;
-        }
-
-        console.log('File uploaded successfully:', uploadData);
-
-        // Get the public URL
-        const { data: urlData } = supabase.storage
-          .from('complaint-files')
-          .getPublicUrl(filePath);
-
-        fileUrl = urlData.publicUrl;
-        console.log('File public URL:', fileUrl);
-      }
-
-      console.log('Creating complaint with data:', {
-        user_id: user.id,
-        university_id: profile.university_id,
-        title: formData.issueTitle,
-        category: formData.issueCategory,
-        description: formData.description,
-        file_url: fileUrl
-      });
-
-      const { data: insertData, error: insertError } = await supabase
+      const { error } = await supabase
         .from('complaints')
         .insert({
-          user_id: user.id,
-          university_id: profile.university_id,
-          title: formData.issueTitle,
-          category: formData.issueCategory,
+          student_name: formData.studentName,
+          category: formData.category,
+          title: formData.title,
           description: formData.description,
-          status: 'open',
-          file_url: fileUrl
-        })
-        .select();
-
-      if (insertError) {
-        console.error('Database insert error:', insertError);
-        console.error('Insert error details:', {
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint,
-          code: insertError.code
+          university_id: profile.university_id,
+          status: 'pending'
         });
-        throw insertError;
-      }
 
-      console.log('Complaint created successfully:', insertData);
-      toast.success('✅ Issue submitted successfully! We will review your complaint and get back to you soon.');
-      
-      // Reset form
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your complaint has been submitted successfully",
+      });
+
       setFormData({
-        studentName: '',
-        issueCategory: '',
-        issueTitle: '',
+        studentName: profile?.full_name || '',
+        category: '',
+        title: '',
         description: '',
         screenshot: null
       });
-      
-      // Clear file input
-      const fileInput = document.getElementById('screenshot') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-      
     } catch (error) {
       console.error('Error submitting complaint:', error);
-      toast.error('Failed to submit complaint. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to submit complaint",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    console.log('File selected:', file?.name, file?.size);
-    setFormData(prev => ({ ...prev, screenshot: file }));
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-sm">
-          <CardHeader>
-            <div className="flex items-center gap-4 mb-4">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/uconnect')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to U Connect
-              </Button>
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <div className="max-w-2xl mx-auto p-6 pt-20">
+        <button
+          onClick={() => navigate('/uconnect')}
+          className="mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          Back to U Connect
+        </button>
+
+        <div className="bg-card rounded-xl shadow-lg p-8 border border-border">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <AlertCircle className="text-red-600" size={28} />
+            <h1 className="text-2xl font-bold text-card-foreground">Help Centre</h1>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Label htmlFor="studentName" className="text-card-foreground">👤 Student Name *</Label>
+              <Input
+                id="studentName"
+                value={formData.studentName}
+                onChange={(e) => setFormData({...formData, studentName: e.target.value})}
+                placeholder="Enter your name"
+                required
+                className="mt-1 bg-background border-border text-foreground"
+              />
             </div>
-            <CardTitle className="text-3xl font-bold text-center text-red-600">
-              🚨 Help Centre
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="studentName">👤 Student Name *</Label>
-                <Input
-                  id="studentName"
-                  type="text"
-                  value={formData.studentName}
-                  onChange={(e) => handleInputChange('studentName', e.target.value)}
-                  placeholder="Enter your name"
-                  required
-                />
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="issueCategory">📂 Issue Category *</Label>
-                <Input
-                  id="issueCategory"
-                  type="text"
-                  value={formData.issueCategory}
-                  onChange={(e) => handleInputChange('issueCategory', e.target.value)}
-                  placeholder="e.g., Bug, UI, Suggestion, Technical Issue"
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="category" className="text-card-foreground">📂 Issue Category *</Label>
+              <Input
+                id="category"
+                value={formData.category}
+                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                placeholder="e.g., Bug, UI, Suggestion, Technical Issue"
+                required
+                className="mt-1 bg-background border-border text-foreground"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="issueTitle">📌 Issue Title *</Label>
-                <Input
-                  id="issueTitle"
-                  type="text"
-                  value={formData.issueTitle}
-                  onChange={(e) => handleInputChange('issueTitle', e.target.value)}
-                  placeholder="Short descriptive title"
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="title" className="text-card-foreground">📌 Issue Title *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                placeholder="Short descriptive title"
+                required
+                className="mt-1 bg-background border-border text-foreground"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">📝 Description *</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Explain the issue in detail..."
-                  rows={4}
-                  className="resize-vertical"
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="description" className="text-card-foreground">📝 Description *</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Explain the issue in detail..."
+                required
+                className="mt-1 min-h-[120px] bg-background border-border text-foreground"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="screenshot">📎 Upload Screenshot/File (Optional)</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="screenshot"
-                    type="file"
-                    accept="image/*,.pdf,.doc,.docx"
-                    onChange={handleFileChange}
-                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  <Upload className="h-4 w-4 text-gray-400" />
-                </div>
-                <p className="text-xs text-gray-500">Accepted formats: Images, PDF, Word documents</p>
-                {formData.screenshot && (
-                  <p className="text-sm text-green-600">File selected: {formData.screenshot.name}</p>
-                )}
-              </div>
+            <div>
+              <Label htmlFor="screenshot" className="text-card-foreground">📎 Upload Screenshot (Optional)</Label>
+              <Input
+                id="screenshot"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFormData({...formData, screenshot: e.target.files?.[0] || null})}
+                className="mt-1 bg-background border-border text-foreground"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Accepted formats: Images, PDF, Word documents
+              </p>
+            </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-red-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
-                disabled={loading}
-              >
-                {loading ? 'Submitting...' : '✅ Submit Issue'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors"
+            >
+              {loading ? 'Submitting...' : '✅ Submit Issue'}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
