@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
-import { User, FileText, Building, Calendar, ShoppingBag, LogOut, Shield, UtensilsCrossed, BarChart3 } from 'lucide-react';
+import { User, FileText, Building, Calendar, ShoppingBag, LogOut, Shield, UtensilsCrossed, BarChart3, Bell } from 'lucide-react';
 
 const ProfilePage = () => {
   const { profile, signOut } = useAuth();
@@ -37,6 +37,7 @@ const ProfilePage = () => {
   if (profile.role === 'admin') {
     profileActions.splice(1, 0, 
       { icon: Shield, label: 'Admin Dashboard', action: () => navigate('/admin') },
+      { icon: Bell, label: 'Manage Notifications', action: () => navigate('/admin') },
       { icon: UtensilsCrossed, label: 'Manage Mess Menu', action: () => navigate('/mess-menu-admin') },
       { icon: BarChart3, label: 'Analytics', action: () => navigate('/admin/analytics') }
     );
@@ -69,7 +70,7 @@ const ProfilePage = () => {
                 onClick={action.action}
                 variant="outline"
                 className={`w-full flex items-center justify-center space-x-2 py-3 border-border hover:bg-accent hover:text-accent-foreground ${
-                  action.label.includes('Admin') || action.label.includes('Manage Mess') || action.label.includes('Analytics') 
+                  action.label.includes('Admin') || action.label.includes('Manage') || action.label.includes('Analytics') 
                     ? 'text-red-600 hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-950' 
                     : ''
                 }`}

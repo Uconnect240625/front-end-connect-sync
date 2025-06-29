@@ -4,17 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
 
-interface Announcement {
+interface Notification {
   id: string;
   title: string;
-  content: string;
+  message: string;
   type: string;
+  is_read: boolean;
   created_at: string;
-  category?: string;
   user_id: string;
 }
 
@@ -22,32 +22,33 @@ const Notifications = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useAuth();
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
 
-  const filters = ['All', 'Official', 'Clubs', 'Hostel', 'Academics', 'Emergency'];
+  const filters = ['All', 'Unread', 'General', 'Urgent', 'Maintenance', 'Academic'];
 
   useEffect(() => {
     if (profile?.university_id) {
-      fetchAnnouncements();
+      fetchNotifications();
     }
   }, [profile?.university_id]);
 
-  const fetchAnnouncements = async () => {
+  const fetchNotifications = async () => {
     if (!profile?.university_id) return;
 
     try {
       const { data, error } = await supabase
-        .from('announcements')
+        .from('notifications')
         .select('*')
         .eq('university_id', profile.university_id)
+        .or(`user_id.eq.${profile.id},user_id.is.null`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAnnouncements(data || []);
+      setNotifications(data || []);
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      console.error('Error fetching notifications:', error);
       toast({
         title: "Error",
         description: "Failed to fetch notifications",
@@ -58,16 +59,63 @@ const Notifications = () => {
     }
   };
 
-  const filteredAnnouncements = announcements.filter(announcement => 
-    activeFilter === 'All' || announcement.type === activeFilter
-  );
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+        .eq('user_id', profile?.id);
+
+      if (error) throw error;
+
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === notificationId 
+            ? { ...notif, is_read: true }
+            : notif
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Notification marked as read"
+      });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to mark notification as read",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const filteredNotifications = notifications.filter(notification => {
+    if (activeFilter === 'All') return true;
+    if (activeFilter === 'Unread') return !notification.is_read;
+    return notification.type === activeFilter.toLowerCase();
+  });
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'urgent': return '🚨';
+      case 'maintenance': return '🔧';
+      case 'academic': return '📚';
+      default: return '📢';
+    }
   };
 
   if (loading) {
@@ -90,6 +138,11 @@ const Notifications = () => {
           <div className="flex items-center justify-center gap-2">
             <Bell size={24} />
             <h1 className="text-xl font-bold">🔔 Notifications</h1>
+            {unreadCount > 0 && (
+              <span className="bg-white text-red-600 px-2 py-1 rounded-full text-sm font-bold">
+                {unreadCount}
+              </span>
+            )}
           </div>
         </div>
 
@@ -107,25 +160,65 @@ const Notifications = () => {
               }`}
             >
               {filter}
+              {filter === 'Unread' && unreadCount > 0 && (
+                <span className="ml-1 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-xs">
+                  {unreadCount}
+                </span>
+              )}
             </Button>
           ))}
         </div>
 
         <div className="p-4">
-          {filteredAnnouncements.length === 0 ? (
+          {filteredNotifications.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📢</div>
               <h3 className="text-xl font-semibold text-card-foreground mb-2">No Notifications</h3>
-              <p className="text-muted-foreground">No {activeFilter.toLowerCase()} notifications available</p>
+              <p className="text-muted-foreground">
+                No {activeFilter.toLowerCase()} notifications available
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredAnnouncements.map((announcement) => (
-                <div key={announcement.id} className="bg-card rounded-xl p-4 shadow-sm border border-border">
-                  <h3 className="font-semibold text-lg text-red-600 mb-2">{announcement.title}</h3>
-                  <p className="text-card-foreground mb-3">{announcement.content}</p>
-                  <div className="text-sm text-muted-foreground text-right">
-                    {formatDate(announcement.created_at)}
+              {filteredNotifications.map((notification) => (
+                <div 
+                  key={notification.id} 
+                  className={`bg-card rounded-xl p-4 shadow-sm border transition-all ${
+                    notification.is_read 
+                      ? 'border-border opacity-75' 
+                      : 'border-red-200 bg-red-50 dark:bg-red-950/20'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                        <h3 className={`font-semibold text-lg ${
+                          notification.is_read ? 'text-muted-foreground' : 'text-red-600'
+                        }`}>
+                          {notification.title}
+                        </h3>
+                        {!notification.is_read && (
+                          <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            NEW
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-card-foreground mb-3">{notification.message}</p>
+                      <div className="text-sm text-muted-foreground">
+                        {formatDate(notification.created_at)}
+                      </div>
+                    </div>
+                    {!notification.is_read && notification.user_id && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => markAsRead(notification.id)}
+                        className="ml-4 text-green-600 hover:bg-green-50"
+                      >
+                        <Check size={16} />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}

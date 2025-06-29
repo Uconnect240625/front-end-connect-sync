@@ -5,13 +5,14 @@ import Navigation from '@/components/Navigation';
 import AdminStats from '@/components/admin/AdminStats';
 import ApprovalQueue from '@/components/admin/ApprovalQueue';
 import ComplaintsManager from '@/components/admin/ComplaintsManager';
+import NotificationManager from '@/components/admin/NotificationManager';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart3, DollarSign, UtensilsCrossed, Users, FileText, Building, Calendar, ShoppingBag } from 'lucide-react';
+import { BarChart3, DollarSign, UtensilsCrossed, Users, FileText, Building, Calendar, ShoppingBag, Bell } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { profile } = useAuth();
@@ -20,7 +21,8 @@ const AdminDashboard = () => {
     pendingApprovals: 0,
     totalRevenue: 0,
     activeUsers: 0,
-    pendingComplaints: 0
+    pendingComplaints: 0,
+    totalNotifications: 0
   });
   const [approvalItems, setApprovalItems] = useState([]);
   const [complaints, setComplaints] = useState([]);
@@ -45,7 +47,7 @@ const AdminDashboard = () => {
       console.log('Loading dashboard data for university:', profile?.university_id);
       
       // Load pending approvals from all tables
-      const [pgListings, marketplaceItems, clubEvents, complaintsData] = await Promise.all([
+      const [pgListings, marketplaceItems, clubEvents, complaintsData, notificationsData] = await Promise.all([
         supabase
           .from('pg_listings')
           .select('*')
@@ -69,7 +71,13 @@ const AdminDashboard = () => {
           .from('complaints')
           .select('*')
           .eq('university_id', profile?.university_id)
-          .order('created_at', { ascending: false })
+          .order('created_at', { ascending: false }),
+
+        // Load notifications count
+        supabase
+          .from('notifications')
+          .select('id')
+          .eq('university_id', profile?.university_id)
       ]);
 
       // Combine approval items
@@ -106,7 +114,8 @@ const AdminDashboard = () => {
         pendingApprovals: allApprovalItems.length,
         totalRevenue,
         activeUsers: 0, // This would need a separate query
-        pendingComplaints
+        pendingComplaints,
+        totalNotifications: notificationsData.data?.length || 0
       });
 
     } catch (error) {
@@ -180,9 +189,10 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="approvals" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-muted">
+          <TabsList className="grid w-full grid-cols-3 bg-muted">
             <TabsTrigger value="approvals" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Pending Approvals ({stats.pendingApprovals})</TabsTrigger>
             <TabsTrigger value="complaints" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Complaints ({complaints.length})</TabsTrigger>
+            <TabsTrigger value="notifications" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Notifications ({stats.totalNotifications})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="approvals">
@@ -197,6 +207,10 @@ const AdminDashboard = () => {
               complaints={complaints} 
               onComplaintUpdate={loadDashboardData}
             />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <NotificationManager />
           </TabsContent>
         </Tabs>
       </div>

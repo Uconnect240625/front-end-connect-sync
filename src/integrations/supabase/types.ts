@@ -309,6 +309,8 @@ export type Database = {
           is_read: boolean | null
           message: string
           title: string
+          type: string | null
+          university_id: string
           user_id: string
         }
         Insert: {
@@ -317,6 +319,8 @@ export type Database = {
           is_read?: boolean | null
           message: string
           title: string
+          type?: string | null
+          university_id: string
           user_id: string
         }
         Update: {
@@ -325,9 +329,19 @@ export type Database = {
           is_read?: boolean | null
           message?: string
           title?: string
+          type?: string | null
+          university_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pg_listings: {
         Row: {
