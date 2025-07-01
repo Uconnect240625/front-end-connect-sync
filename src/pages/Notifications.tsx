@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +14,7 @@ interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
-  user_id: string;
+  user_id: string | null;
 }
 
 const Notifications = () => {
@@ -69,6 +68,7 @@ const Notifications = () => {
 
       if (error) throw error;
 
+      // Update local state immediately
       setNotifications(prev => 
         prev.map(notif => 
           notif.id === notificationId 
