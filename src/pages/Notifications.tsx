@@ -25,7 +25,7 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
 
-  const filters = ['All', 'Unread', 'General', 'Urgent', 'Maintenance', 'Academic'];
+  const filters = ['All', 'General', 'Urgent', 'Maintenance', 'Academic'];
 
   useEffect(() => {
     if (profile?.university_id) {
@@ -58,46 +58,11 @@ const Notifications = () => {
     }
   };
 
-  const markAsRead = async (notificationId: string) => {
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('id', notificationId)
-        .eq('user_id', profile?.id);
-
-      if (error) throw error;
-
-      // Update local state immediately
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === notificationId 
-            ? { ...notif, is_read: true }
-            : notif
-        )
-      );
-
-      toast({
-        title: "Success",
-        description: "Notification marked as read"
-      });
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      toast({
-        title: "Error", 
-        description: "Failed to mark notification as read",
-        variant: "destructive"
-      });
-    }
-  };
 
   const filteredNotifications = notifications.filter(notification => {
     if (activeFilter === 'All') return true;
-    if (activeFilter === 'Unread') return !notification.is_read;
     return notification.type === activeFilter.toLowerCase();
   });
-
-  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -138,11 +103,6 @@ const Notifications = () => {
           <div className="flex items-center justify-center gap-2">
             <Bell size={24} />
             <h1 className="text-xl font-bold">🔔 Notifications</h1>
-            {unreadCount > 0 && (
-              <span className="bg-white text-red-600 px-2 py-1 rounded-full text-sm font-bold">
-                {unreadCount}
-              </span>
-            )}
           </div>
         </div>
 
@@ -160,11 +120,6 @@ const Notifications = () => {
               }`}
             >
               {filter}
-              {filter === 'Unread' && unreadCount > 0 && (
-                <span className="ml-1 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-xs">
-                  {unreadCount}
-                </span>
-              )}
             </Button>
           ))}
         </div>
@@ -183,42 +138,21 @@ const Notifications = () => {
               {filteredNotifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className={`bg-card rounded-xl p-4 shadow-sm border transition-all ${
-                    notification.is_read 
-                      ? 'border-border opacity-75' 
-                      : 'border-red-200 bg-red-50 dark:bg-red-950/20'
-                  }`}
+                  className="bg-card rounded-xl p-4 shadow-sm border border-border transition-all"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xl">{getNotificationIcon(notification.type)}</span>
-                        <h3 className={`font-semibold text-lg ${
-                          notification.is_read ? 'text-muted-foreground' : 'text-red-600'
-                        }`}>
+                        <h3 className="font-semibold text-lg text-red-600">
                           {notification.title}
                         </h3>
-                        {!notification.is_read && (
-                          <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                            NEW
-                          </span>
-                        )}
                       </div>
                       <p className="text-card-foreground mb-3">{notification.message}</p>
                       <div className="text-sm text-muted-foreground">
                         {formatDate(notification.created_at)}
                       </div>
                     </div>
-                    {!notification.is_read && notification.user_id && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => markAsRead(notification.id)}
-                        className="ml-4 text-green-600 hover:bg-green-50"
-                      >
-                        <Check size={16} />
-                      </Button>
-                    )}
                   </div>
                 </div>
               ))}
