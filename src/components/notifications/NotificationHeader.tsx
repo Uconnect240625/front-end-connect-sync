@@ -12,7 +12,7 @@ const NotificationHeader = () => {
         ← Back to U Connect
       </button>
       
-      <div className="bg-red-600 text-white p-4 text-center">
+      <div className="text-white p-4 text-center">
         <h1 className="text-xl font-bold">🔔 Notifications</h1>
       </div>
     </div>
