@@ -13,7 +13,7 @@ const NotificationHeader = () => {
       </button>
       
       <div className="text-white p-4 text-center">
-        <h1 className="text-xl font-bold">🔔 Notifications</h1>
+        <h1 className="text-xl font-bold text-black">🔔 Notifications</h1>
       </div>
     </div>
   );
