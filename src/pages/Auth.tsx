@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,13 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import PolicyAcceptance from '@/components/PolicyAcceptance';
 
 export default function Auth() {
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [universities, setUniversities] = useState<any[]>([]);
+  const [showPolicyAcceptance, setShowPolicyAcceptance] = useState(false);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -30,10 +31,15 @@ export default function Auth() {
   const [universityId, setUniversityId] = useState('');
 
   useEffect(() => {
-    if (user) {
-      navigate('/uconnect');
+    // Check if user is authenticated and their policy acceptance status
+    if (user && profile) {
+      if (!profile.policies_accepted) {
+        setShowPolicyAcceptance(true);
+      } else {
+        navigate('/uconnect');
+      }
     }
-  }, [user, navigate]);
+  }, [user, profile, navigate]);
 
   useEffect(() => {
     fetchUniversities();
@@ -77,7 +83,7 @@ export default function Auth() {
           title: "Welcome back!",
           description: "You have been logged in successfully."
         });
-        navigate('/uconnect');
+        // Navigation will be handled by the useEffect above based on policy acceptance
       }
     } catch (err) {
       console.error('Login catch error:', err);
@@ -150,7 +156,7 @@ export default function Auth() {
         console.log('Comprehensive signup successful');
         toast({
           title: "Account Created!",
-          description: "Your account has been created successfully. You can now log in."
+          description: "Your account has been created successfully. Please accept our policies to continue."
         });
         // Clear form
         setSignupEmail('');
@@ -158,6 +164,7 @@ export default function Auth() {
         setFullName('');
         setRole('');
         setUniversityId('');
+        // Policy acceptance will be shown via useEffect when user state updates
       }
     } catch (err) {
       console.error('Signup comprehensive catch error:', err);
@@ -170,6 +177,11 @@ export default function Auth() {
     
     setLoading(false);
   };
+
+  // Show policy acceptance page if user is authenticated but hasn't accepted policies
+  if (showPolicyAcceptance && user && profile && !profile.policies_accepted) {
+    return <PolicyAcceptance />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4 light">
