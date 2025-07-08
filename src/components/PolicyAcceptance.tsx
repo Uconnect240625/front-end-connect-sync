@@ -283,7 +283,7 @@ const PolicyAcceptance = () => {
               <Checkbox
                 id="policy-acceptance"
                 checked={isChecked}
-                onCheckedChange={setIsChecked}
+                onCheckedChange={(checked) => setIsChecked(checked === true)}
                 className="border-gray-300"
               />
               <label 
