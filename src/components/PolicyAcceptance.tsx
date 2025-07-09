@@ -66,7 +66,7 @@ const PolicyAcceptance = () => {
 
       toast({
         title: "Policies Accepted",
-        description: "Thank you for accepting our policies. Welcome to UConnect!",
+        description: "Thank you for accepting our policies. Welcome to U Connect!",
       });
 
       // Navigate to main application
@@ -100,7 +100,7 @@ const PolicyAcceptance = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">PRIVACY POLICY</h3>
                 <div className="space-y-3">
                   <p>
-                    This Privacy Policy describes how UConnect ("we," "our," or "us") collects, uses, and protects your personal information when you use our platform.
+                    This Privacy Policy describes how U Connect ("we," "our," or "us") collects, uses, and protects your personal information when you use our platform.
                   </p>
                   
                   <h4 className="font-semibold">Information We Collect</h4>
@@ -150,7 +150,7 @@ const PolicyAcceptance = () => {
                 <div className="space-y-3">
                   <h4 className="font-semibold">Acceptance of Terms</h4>
                   <p>
-                    By using UConnect, you agree to these Terms of Service. If you disagree with any part of these terms, you may not access or use our services.
+                    By using U Connect, you agree to these Terms of Service. If you disagree with any part of these terms, you may not access or use our services.
                   </p>
 
                   <h4 className="font-semibold">User Accounts</h4>
@@ -175,9 +175,9 @@ const PolicyAcceptance = () => {
                   <h4 className="font-semibold">Content and Intellectual Property</h4>
                   <ul className="list-disc pl-5 space-y-1">
                     <li>You retain ownership of content you create and share on the platform</li>
-                    <li>By sharing content, you grant UConnect a license to display and distribute it within the platform</li>
+                    <li>By sharing content, you grant U Connect a license to display and distribute it within the platform</li>
                     <li>You must respect the intellectual property rights of others</li>
-                    <li>UConnect reserves the right to remove content that violates these terms</li>
+                    <li>U Connect reserves the right to remove content that violates these terms</li>
                   </ul>
 
                   <h4 className="font-semibold">Platform Features</h4>
@@ -200,7 +200,7 @@ const PolicyAcceptance = () => {
 
                   <h4 className="font-semibold">Limitation of Liability</h4>
                   <p>
-                    UConnect is provided "as is" without warranties. We are not liable for any damages arising from your use of the platform.
+                    U Connect is provided "as is" without warranties. We are not liable for any damages arising from your use of the platform.
                   </p>
 
                   <h4 className="font-semibold">Changes to Terms</h4>
@@ -215,7 +215,7 @@ const PolicyAcceptance = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">COMMUNITY GUIDELINES</h3>
                 <div className="space-y-3">
                   <p>
-                    UConnect is designed to foster a positive, inclusive, and supportive community for students. These guidelines help ensure everyone has a great experience.
+                    U Connect is designed to foster a positive, inclusive, and supportive community for students. These guidelines help ensure everyone has a great experience.
                   </p>
 
                   <h4 className="font-semibold">Be Respectful</h4>
@@ -275,6 +275,14 @@ const PolicyAcceptance = () => {
                   </ul>
                 </div>
               </div>
+
+              {/* Copyright Notice */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">COPYRIGHT NOTICE</h3>
+                <p className="text-sm text-gray-600">
+                  © 2025 U Connect. All Rights Reserved. The content, layout, design, and policies of U Connect are the intellectual property of U Connect. No part of this document may be reproduced, stored, or transmitted in any form without prior written permission from the Founder.
+                </p>
+              </div>
             </div>
           </ScrollArea>
 
@@ -300,7 +308,7 @@ const PolicyAcceptance = () => {
                 disabled={!isChecked || isSubmitting}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 text-lg"
               >
-                {isSubmitting ? 'Accepting...' : 'Continue to UConnect'}
+                {isSubmitting ? 'Accepting...' : 'Continue to U Connect'}
               </Button>
             </div>
           </div>
