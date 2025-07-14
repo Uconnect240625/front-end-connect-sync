@@ -10,11 +10,18 @@ import { ApprovalStatus } from '@/types/database';
 interface ApprovalItem {
   id: string;
   title: string;
-  type: 'pg_listing' | 'marketplace_item' | 'club_event';
+  type: 'pg_listing' | 'marketplace_item' | 'club_event' | 'roommate_request';
   user_name?: string;
+  requester_name?: string;
   created_at: string;
-  is_paid: boolean;  // Use is_paid instead of payment_status
+  is_paid: boolean;
   approval_status: ApprovalStatus;
+  // Additional fields for roommate requests
+  gender?: string;
+  budget?: number;
+  location?: string;
+  contact_number?: string;
+  preferences?: string;
 }
 
 interface ApprovalQueueProps {
@@ -26,7 +33,8 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
   const handleApproval = async (itemId: string, type: string, status: 'approved' | 'rejected') => {
     try {
       const tableName = type === 'pg_listing' ? 'pg_listings' : 
-                       type === 'marketplace_item' ? 'marketplace_items' : 'club_events';
+                       type === 'marketplace_item' ? 'marketplace_items' : 
+                       type === 'club_event' ? 'club_events' : 'roommate_requests';
       
       const { error } = await supabase
         .from(tableName)
@@ -48,6 +56,7 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
       case 'pg_listing': return '🏠';
       case 'marketplace_item': return '🛒';
       case 'club_event': return '🎉';
+      case 'roommate_request': return '🧑‍🤝‍🧑';
       default: return '📄';
     }
   };
@@ -57,8 +66,30 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
       case 'pg_listing': return 'PG Listing';
       case 'marketplace_item': return 'Marketplace Item';
       case 'club_event': return 'Club Event';
+      case 'roommate_request': return 'Roommate Request';
       default: return 'Unknown';
     }
+  };
+
+  const renderItemDetails = (item: ApprovalItem) => {
+    if (item.type === 'roommate_request') {
+      return (
+        <>
+          <p className="text-sm text-gray-600">By: {item.requester_name}</p>
+          <p className="text-sm text-gray-600">Gender: {item.gender}</p>
+          <p className="text-sm text-gray-600">Budget: ₹{item.budget}</p>
+          <p className="text-sm text-gray-600">Location: {item.location}</p>
+          <p className="text-sm text-gray-600">Contact: {item.contact_number}</p>
+          {item.preferences && (
+            <p className="text-sm text-gray-600">Preferences: {item.preferences}</p>
+          )}
+        </>
+      );
+    }
+    
+    return item.user_name && (
+      <p className="text-sm text-gray-600">By: {item.user_name}</p>
+    );
   };
 
   return (
@@ -81,16 +112,16 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
                     <div className="flex items-center gap-2 mb-2">
                       <span>{getTypeIcon(item.type)}</span>
                       <Badge variant="outline">{getTypeLabel(item.type)}</Badge>
-                      <Badge 
-                        variant={item.is_paid ? 'default' : 'destructive'}
-                      >
-                        {item.is_paid ? 'paid' : 'unpaid'}
-                      </Badge>
+                      {item.type !== 'roommate_request' && (
+                        <Badge 
+                          variant={item.is_paid ? 'default' : 'destructive'}
+                        >
+                          {item.is_paid ? 'paid' : 'unpaid'}
+                        </Badge>
+                      )}
                     </div>
                     <h4 className="font-semibold">{item.title}</h4>
-                    {item.user_name && (
-                      <p className="text-sm text-gray-600">By: {item.user_name}</p>
-                    )}
+                    {renderItemDetails(item)}
                     <p className="text-sm text-gray-500">
                       Submitted: {new Date(item.created_at).toLocaleDateString()}
                     </p>

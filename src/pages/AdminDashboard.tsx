@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import Navigation from '@/components/Navigation';
@@ -46,8 +45,8 @@ const AdminDashboard = () => {
       
       console.log('Loading dashboard data for university:', profile?.university_id);
       
-      // Load pending approvals from all tables
-      const [pgListings, marketplaceItems, clubEvents, complaintsData, notificationsData] = await Promise.all([
+      // Load pending approvals from all tables including roommate requests
+      const [pgListings, marketplaceItems, clubEvents, roommateRequests, complaintsData, notificationsData] = await Promise.all([
         supabase
           .from('pg_listings')
           .select('*')
@@ -62,6 +61,12 @@ const AdminDashboard = () => {
         
         supabase
           .from('club_events')
+          .select('*')
+          .eq('university_id', profile?.university_id)
+          .eq('approval_status', 'pending'),
+        
+        supabase
+          .from('roommate_requests')
           .select('*')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
@@ -93,6 +98,12 @@ const AdminDashboard = () => {
         ...(clubEvents.data || []).map(item => ({
           ...item,
           type: 'club_event' as const
+        })),
+        ...(roommateRequests.data || []).map(item => ({
+          ...item,
+          type: 'roommate_request' as const,
+          title: `Roommate Request by ${item.requester_name}`,
+          is_paid: false // Roommate requests don't have payment
         }))
       ];
 
