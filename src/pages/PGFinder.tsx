@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, Building, Users, Plus } from 'lucide-react';
+import { ArrowLeft, Building, Users, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Navigation from '@/components/Navigation';
@@ -99,6 +99,76 @@ const PGFinder = () => {
     });
   };
 
+  const handleDeletePGListing = async (id: string, title: string) => {
+    if (!profile || profile.role !== 'admin') {
+      toast({
+        title: "Access Denied",
+        description: "Only admins can delete PG listings",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('pg_listings')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `PG listing "${title}" deleted successfully`,
+      });
+
+      // Refresh the data
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting PG listing:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete PG listing",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteRoommateRequest = async (id: string, name: string) => {
+    if (!profile || profile.role !== 'admin') {
+      toast({
+        title: "Access Denied",
+        description: "Only admins can delete roommate requests",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('roommate_requests')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Roommate request by "${name}" deleted successfully`,
+      });
+
+      // Refresh the data
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting roommate request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete roommate request",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -164,7 +234,19 @@ const PGFinder = () => {
                   <div key={pg.id} className="bg-card rounded-xl shadow-lg p-6 border border-border hover:shadow-xl transition-shadow">
                     <div className="flex items-start justify-between mb-4">
                       <h3 className="font-semibold text-lg text-card-foreground">{pg.title}</h3>
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">PG Listing</span>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">PG Listing</span>
+                        {profile?.role === 'admin' && (
+                          <Button
+                            onClick={() => handleDeletePGListing(pg.id, pg.title)}
+                            size="sm"
+                            variant="destructive"
+                            className="p-2"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="space-y-2 text-sm">
@@ -209,7 +291,19 @@ const PGFinder = () => {
                   <div key={request.id} className="bg-card rounded-xl shadow-lg p-6 border border-border hover:shadow-xl transition-shadow">
                     <div className="flex items-start justify-between mb-4">
                       <h3 className="font-semibold text-lg text-card-foreground">{request.requester_name}</h3>
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Roommate Request</span>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Roommate Request</span>
+                        {profile?.role === 'admin' && (
+                          <Button
+                            onClick={() => handleDeleteRoommateRequest(request.id, request.requester_name)}
+                            size="sm"
+                            variant="destructive"
+                            className="p-2"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="space-y-2 text-sm">

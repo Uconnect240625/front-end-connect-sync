@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +15,6 @@ import * as z from 'zod';
 
 const pgListingSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  type: z.enum(['pg', 'roommate']),
   location: z.string().min(1, 'Location is required'),
   price: z.string().min(1, 'Price is required'),
   description: z.string().optional(),
@@ -33,7 +31,6 @@ const PGListingForm = () => {
     resolver: zodResolver(pgListingSchema),
     defaultValues: {
       title: '',
-      type: 'pg',
       location: '',
       price: '',
       description: '',
@@ -61,7 +58,7 @@ const PGListingForm = () => {
           user_id: profile.id,
           university_id: profile.university_id,
           title: data.title,
-          type: data.type as any,
+          type: 'pg' as any, // Default to 'pg' type
           location: data.location,
           price: parseFloat(data.price),
           description: data.description,
@@ -115,28 +112,6 @@ const PGListingForm = () => {
                   <FormControl>
                     <Input placeholder="e.g., Star Boys PG" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pg">PG Accommodation</SelectItem>
-                      <SelectItem value="roommate">Roommate Sharing</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
