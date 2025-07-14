@@ -16,7 +16,7 @@ import * as z from 'zod';
 
 const pgListingSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  type: z.enum(['pg', 'flat', 'room']),
+  type: z.enum(['pg', 'roommate']),
   location: z.string().min(1, 'Location is required'),
   price: z.string().min(1, 'Price is required'),
   description: z.string().optional(),
@@ -133,9 +133,8 @@ const PGListingForm = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="pg">PG</SelectItem>
-                      <SelectItem value="flat">Flat</SelectItem>
-                      <SelectItem value="room">Room</SelectItem>
+                      <SelectItem value="pg">PG Accommodation</SelectItem>
+                      <SelectItem value="roommate">Roommate Sharing</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
