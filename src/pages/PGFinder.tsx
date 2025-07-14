@@ -7,6 +7,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, Building, Users, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import Navigation from '@/components/Navigation';
 
 interface PGListing {
@@ -110,25 +121,29 @@ const PGFinder = () => {
     }
 
     try {
+      console.log('Deleting PG listing:', id);
       const { error } = await supabase
         .from('pg_listings')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+
+      // Remove from local state immediately
+      setPgListings(prev => prev.filter(listing => listing.id !== id));
 
       toast({
         title: "Success",
-        description: `PG listing "${title}" deleted successfully`,
+        description: `PG listing "${title}" has been deleted successfully`,
       });
-
-      // Refresh the data
-      fetchData();
     } catch (error) {
       console.error('Error deleting PG listing:', error);
       toast({
         title: "Error",
-        description: "Failed to delete PG listing",
+        description: "Failed to delete PG listing. Please try again.",
         variant: "destructive"
       });
     }
@@ -145,25 +160,29 @@ const PGFinder = () => {
     }
 
     try {
+      console.log('Deleting roommate request:', id);
       const { error } = await supabase
         .from('roommate_requests')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+
+      // Remove from local state immediately
+      setRoommateRequests(prev => prev.filter(request => request.id !== id));
 
       toast({
         title: "Success",
-        description: `Roommate request by "${name}" deleted successfully`,
+        description: `Roommate request by "${name}" has been deleted successfully`,
       });
-
-      // Refresh the data
-      fetchData();
     } catch (error) {
       console.error('Error deleting roommate request:', error);
       toast({
         title: "Error",
-        description: "Failed to delete roommate request",
+        description: "Failed to delete roommate request. Please try again.",
         variant: "destructive"
       });
     }
@@ -237,14 +256,30 @@ const PGFinder = () => {
                       <div className="flex items-center gap-2">
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">PG Listing</span>
                         {profile?.role === 'admin' && (
-                          <Button
-                            onClick={() => handleDeletePGListing(pg.id, pg.title)}
-                            size="sm"
-                            variant="destructive"
-                            className="p-2"
-                          >
-                            <Trash2 size={14} />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="destructive" className="p-2">
+                                <Trash2 size={14} />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete PG Listing</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{pg.title}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeletePGListing(pg.id, pg.title)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         )}
                       </div>
                     </div>
@@ -294,14 +329,30 @@ const PGFinder = () => {
                       <div className="flex items-center gap-2">
                         <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Roommate Request</span>
                         {profile?.role === 'admin' && (
-                          <Button
-                            onClick={() => handleDeleteRoommateRequest(request.id, request.requester_name)}
-                            size="sm"
-                            variant="destructive"
-                            className="p-2"
-                          >
-                            <Trash2 size={14} />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="destructive" className="p-2">
+                                <Trash2 size={14} />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Roommate Request</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the roommate request by "{request.requester_name}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteRoommateRequest(request.id, request.requester_name)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         )}
                       </div>
                     </div>
