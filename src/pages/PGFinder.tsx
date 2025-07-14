@@ -91,6 +91,14 @@ const PGFinder = () => {
     }).format(price);
   };
 
+  const handleContactPG = (contactPhone: string, title: string) => {
+    toast({
+      title: "Contact Information",
+      description: `Contact ${title} owner at ${contactPhone}`,
+      duration: 5000,
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -132,6 +140,18 @@ const PGFinder = () => {
           </TabsList>
 
           <TabsContent value="pg-listings" className="mt-6">
+            {profile?.role === 'admin' && (
+              <div className="mb-4 flex justify-end">
+                <Button
+                  onClick={() => navigate('/post-roommate-request')}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Plus size={16} className="mr-2" />
+                  List a PG
+                </Button>
+              </div>
+            )}
+
             {pgListings.length === 0 ? (
               <div className="text-center py-12 bg-card rounded-xl border border-border">
                 <div className="text-6xl mb-4">🏠</div>
@@ -152,19 +172,13 @@ const PGFinder = () => {
                       <p><strong className="text-card-foreground">Price:</strong> <span className="text-green-600 font-semibold">{formatPrice(pg.price)}/month</span></p>
                       <p><strong className="text-card-foreground">Type:</strong> <span className="text-muted-foreground">{pg.type}</span></p>
                       <p><strong className="text-card-foreground">Description:</strong> <span className="text-muted-foreground">{pg.description}</span></p>
-                      <p><strong className="text-card-foreground">Contact:</strong> <span className="text-muted-foreground">{pg.contact_phone}</span></p>
                     </div>
                     
                     <Button 
-                      className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white"
-                      onClick={() => {
-                        toast({
-                          title: "Contact Information",
-                          description: `Contact owner at ${pg.contact_phone}`
-                        });
-                      }}
+                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => handleContactPG(pg.contact_phone, pg.title)}
                     >
-                      Contact Owner
+                      Contact PG Owner
                     </Button>
                   </div>
                 ))}
@@ -205,7 +219,6 @@ const PGFinder = () => {
                       {request.preferences && (
                         <p><strong className="text-card-foreground">Preferences:</strong> <span className="text-muted-foreground">{request.preferences}</span></p>
                       )}
-                      <p><strong className="text-card-foreground">Contact:</strong> <span className="text-muted-foreground">{request.contact_number}</span></p>
                     </div>
                     
                     <Button 
@@ -213,7 +226,8 @@ const PGFinder = () => {
                       onClick={() => {
                         toast({
                           title: "Contact Information",
-                          description: `Contact ${request.requester_name} at ${request.contact_number}`
+                          description: `Contact ${request.requester_name} at ${request.contact_number}`,
+                          duration: 5000,
                         });
                       }}
                     >
