@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, Users } from 'lucide-react';
@@ -28,12 +29,35 @@ const PostRoommateRequest = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!profile?.university_id) {
+      toast({
+        title: "Error",
+        description: "Please complete your profile first",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      // For now, just show a success message since the roommate_requests table doesn't exist
+      const { error } = await supabase
+        .from('roommate_requests')
+        .insert({
+          user_id: profile.id,
+          university_id: profile.university_id,
+          requester_name: formData.requesterName,
+          gender: formData.gender,
+          budget: parseFloat(formData.budget),
+          location: formData.location,
+          preferences: formData.preferences,
+          contact_number: formData.contactNumber
+        });
+
+      if (error) throw error;
+
       toast({
-        title: "Coming Soon",
-        description: "Roommate request feature will be available soon!",
+        title: "Success!",
+        description: "Your roommate request has been submitted for approval.",
       });
 
       navigate('/pg-finder');
@@ -151,10 +175,6 @@ const PostRoommateRequest = () => {
               {loading ? 'Submitting...' : '🏠 Post Roommate Request'}
             </Button>
           </form>
-
-          <p className="text-center text-sm text-muted-foreground mt-4">
-            This feature is coming soon! Stay tuned for updates.
-          </p>
         </div>
       </div>
     </div>

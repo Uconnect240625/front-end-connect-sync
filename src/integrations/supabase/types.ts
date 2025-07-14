@@ -479,6 +479,51 @@ export type Database = {
           },
         ]
       }
+      roommate_requests: {
+        Row: {
+          approval_status: string
+          budget: number
+          contact_number: string
+          created_at: string
+          gender: string
+          id: string
+          location: string
+          preferences: string | null
+          requester_name: string
+          university_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approval_status?: string
+          budget: number
+          contact_number: string
+          created_at?: string
+          gender: string
+          id?: string
+          location: string
+          preferences?: string | null
+          requester_name: string
+          university_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approval_status?: string
+          budget?: number
+          contact_number?: string
+          created_at?: string
+          gender?: string
+          id?: string
+          location?: string
+          preferences?: string | null
+          requester_name?: string
+          university_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       universities: {
         Row: {
           code: string
