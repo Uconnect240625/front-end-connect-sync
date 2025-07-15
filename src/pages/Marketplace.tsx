@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
 interface Product {
@@ -11,7 +11,7 @@ interface Product {
   title: string;
   price: number;
   description: string;
-  image_urls?: string[];
+  image_url?: string;
   category: string;
   created_at: string;
   contact_phone?: string;
@@ -27,7 +27,6 @@ const Marketplace = () => {
   } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState<{[key: string]: number}>({});
   useEffect(() => {
     if (profile?.university_id) {
       fetchProducts();
@@ -62,21 +61,6 @@ const Marketplace = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
-
-  const navigateImage = (productId: string, direction: 'next' | 'prev', totalImages: number) => {
-    setCurrentImageIndex(prev => {
-      const currentIndex = prev[productId] || 0;
-      let newIndex;
-      
-      if (direction === 'next') {
-        newIndex = currentIndex >= totalImages - 1 ? 0 : currentIndex + 1;
-      } else {
-        newIndex = currentIndex <= 0 ? totalImages - 1 : currentIndex - 1;
-      }
-      
-      return { ...prev, [productId]: newIndex };
-    });
-  };
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -99,7 +83,7 @@ const Marketplace = () => {
             
             <h1 className="font-bold text-foreground text-2xl">🛒 Marketplace</h1>
           </div>
-          <p className="text-muted-foreground">Buy & Sell with 30,000+ Students</p>
+          <p className="text-muted-foreground">Buy & Sell with 1,000+ Students</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -117,45 +101,7 @@ const Marketplace = () => {
             <p className="text-muted-foreground">Be the first to list a product!</p>
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map(product => <div key={product.id} className="bg-card rounded-xl shadow-lg overflow-hidden border border-border hover:shadow-xl transition-shadow">
-                {product.image_urls && product.image_urls.length > 0 && (
-                  <div className="relative">
-                    <img 
-                      src={product.image_urls[currentImageIndex[product.id] || 0]} 
-                      alt={product.title} 
-                      className="w-full h-48 object-cover" 
-                    />
-                    {product.image_urls.length > 1 && (
-                      <>
-                        <button 
-                          onClick={() => navigateImage(product.id, 'prev', product.image_urls.length)}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
-                          aria-label="Previous image"
-                        >
-                          <ChevronLeft size={16} />
-                        </button>
-                        <button 
-                          onClick={() => navigateImage(product.id, 'next', product.image_urls.length)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
-                          aria-label="Next image"
-                        >
-                          <ChevronRight size={16} />
-                        </button>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
-                          {product.image_urls.map((_, index) => (
-                            <div
-                              key={index}
-                              className={`w-2 h-2 rounded-full ${
-                                index === (currentImageIndex[product.id] || 0) 
-                                  ? 'bg-white' 
-                                  : 'bg-white/50'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+                {product.image_url && <img src={product.image_url} alt={product.title} className="w-full h-48 object-cover" />}
                 <div className="p-4">
                   <h3 className="font-semibold text-lg text-card-foreground mb-2">{product.title}</h3>
                   <p className="text-2xl font-bold text-green-600 mb-2">{formatPrice(product.price)}</p>
