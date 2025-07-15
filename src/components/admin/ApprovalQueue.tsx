@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ApprovalStatus } from '@/types/database';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ApprovalItem {
   id: string;
@@ -22,6 +23,11 @@ interface ApprovalItem {
   location?: string;
   contact_number?: string;
   preferences?: string;
+  // Additional fields for marketplace items
+  price?: number;
+  description?: string;
+  category?: string;
+  image_urls?: string[];
 }
 
 interface ApprovalQueueProps {
@@ -30,6 +36,7 @@ interface ApprovalQueueProps {
 }
 
 const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState<{[key: string]: number}>({});
   const handleApproval = async (itemId: string, type: string, status: 'approved' | 'rejected') => {
     try {
       const tableName = type === 'pg_listing' ? 'pg_listings' : 
@@ -71,6 +78,19 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
     }
   };
 
+  const navigateImage = (itemId: string, direction: 'prev' | 'next', imageCount: number) => {
+    setCurrentImageIndex(prev => {
+      const current = prev[itemId] || 0;
+      let newIndex;
+      if (direction === 'prev') {
+        newIndex = current === 0 ? imageCount - 1 : current - 1;
+      } else {
+        newIndex = current === imageCount - 1 ? 0 : current + 1;
+      }
+      return { ...prev, [itemId]: newIndex };
+    });
+  };
+
   const renderItemDetails = (item: ApprovalItem) => {
     if (item.type === 'roommate_request') {
       return (
@@ -82,6 +102,55 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
           <p className="text-sm text-gray-600">Contact: {item.contact_number}</p>
           {item.preferences && (
             <p className="text-sm text-gray-600">Preferences: {item.preferences}</p>
+          )}
+        </>
+      );
+    }
+    
+    if (item.type === 'marketplace_item') {
+      return (
+        <>
+          <p className="text-sm text-gray-600">Price: ₹{item.price}</p>
+          <p className="text-sm text-gray-600">Category: {item.category}</p>
+          {item.description && (
+            <p className="text-sm text-gray-600">Description: {item.description}</p>
+          )}
+          {item.image_urls && item.image_urls.length > 0 && (
+            <div className="mt-3">
+              <div className="relative">
+                <img 
+                  src={item.image_urls[currentImageIndex[item.id] || 0]} 
+                  alt={item.title}
+                  className="w-full h-48 object-cover rounded-md"
+                />
+                {item.image_urls.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => navigateImage(item.id, 'prev', item.image_urls!.length)}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button
+                      onClick={() => navigateImage(item.id, 'next', item.image_urls!.length)}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                      {item.image_urls.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-2 h-2 rounded-full ${
+                            index === (currentImageIndex[item.id] || 0) ? 'bg-white' : 'bg-white bg-opacity-50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           )}
         </>
       );
