@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 const ListProduct = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     studentName: '',
     productTitle: '',
@@ -70,17 +72,53 @@ const ListProduct = () => {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to list a product",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
       // Upload image to Supabase storage
       const imageUrl = await uploadImage(imageFile);
       
-      // Here you would typically save the product data to your database
-      // For now, we'll just show a success message
+      // Get user's university_id from profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('university_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        throw new Error('Failed to get user profile');
+      }
+
+      // Insert product data into marketplace_items table
+      const { error: insertError } = await supabase
+        .from('marketplace_items')
+        .insert({
+          title: formData.productTitle,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          category: formData.category,
+          contact_phone: formData.contact,
+          image_url: imageUrl,
+          user_id: user.id,
+          university_id: profile.university_id
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+
       toast({
         title: "Success",
-        description: "Product listed successfully! It will appear in the marketplace.",
+        description: "Product listed successfully! It will appear in the marketplace after approval.",
         variant: "default"
       });
       
@@ -97,10 +135,10 @@ const ListProduct = () => {
       setImageFile(null);
       
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error listing product:', error);
       toast({
         title: "Error",
-        description: "Failed to upload image. Please try again.",
+        description: "Failed to list product. Please try again.",
         variant: "destructive"
       });
     } finally {
