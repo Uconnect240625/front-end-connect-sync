@@ -15,7 +15,7 @@ const ListProduct = () => {
     contact: '',
     description: ''
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -26,47 +26,64 @@ const ListProduct = () => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        setImageFile(file);
-      } else {
-        toast({
-          title: "Error",
-          description: "Please select a valid image file",
-          variant: "destructive"
-        });
-      }
+    const files = Array.from(e.target.files || []);
+    
+    if (files.length === 0) return;
+    
+    if (files.length > 5) {
+      toast({
+        title: "Error",
+        description: "You can only upload up to 5 images",
+        variant: "destructive"
+      });
+      return;
     }
+    
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (validFiles.length !== files.length) {
+      toast({
+        title: "Error",
+        description: "Please select only valid image files",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setImageFiles(validFiles);
   };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
+  const uploadImages = async (files: File[]): Promise<string[]> => {
+    const uploadPromises = files.map(async (file, index) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${index}.${fileExt}`;
+      const filePath = `${fileName}`;
 
-    const { error } = await supabase.storage
-      .from('product-images')
-      .upload(filePath, file);
+      const { error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
 
-    if (error) {
-      throw error;
-    }
+      if (error) {
+        throw error;
+      }
 
-    const { data } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(filePath);
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
 
-    return data.publicUrl;
+      return data.publicUrl;
+    });
+
+    return Promise.all(uploadPromises);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!imageFile) {
+    if (imageFiles.length === 0) {
       toast({
         title: "Error",
-        description: "Please select a product image",
+        description: "Please select at least one product image",
         variant: "destructive"
       });
       return;
@@ -84,8 +101,8 @@ const ListProduct = () => {
     setIsSubmitting(true);
     
     try {
-      // Upload image to Supabase storage
-      const imageUrl = await uploadImage(imageFile);
+      // Upload images to Supabase storage
+      const imageUrls = await uploadImages(imageFiles);
       
       // Get user's university_id from profile
       const { data: profile, error: profileError } = await supabase
@@ -107,7 +124,7 @@ const ListProduct = () => {
           price: parseFloat(formData.price),
           category: formData.category,
           contact_phone: formData.contact,
-          image_url: imageUrl,
+          image_urls: imageUrls,
           user_id: user.id,
           university_id: profile.university_id
         });
@@ -132,7 +149,7 @@ const ListProduct = () => {
         contact: '',
         description: ''
       });
-      setImageFile(null);
+      setImageFiles([]);
       
     } catch (error) {
       console.error('Error listing product:', error);
@@ -177,20 +194,30 @@ const ListProduct = () => {
             <textarea id="description" value={formData.description} onChange={handleInputChange} placeholder="Short Description" rows={3} required className="w-full p-3 border border-gray-300 rounded-md" />
 
             <div className="space-y-2">
-              <label htmlFor="productImage" className="block text-sm font-medium text-gray-700">
-                Product Image *
+              <label htmlFor="productImages" className="block text-sm font-medium text-gray-700">
+                Product Images * (Up to 5 images)
               </label>
               <input 
                 type="file" 
-                id="productImage" 
+                id="productImages" 
                 accept="image/*" 
+                multiple
                 onChange={handleImageChange} 
                 required 
                 className="w-full p-3 border border-gray-300 rounded-md file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
-              {imageFile && (
-                <div className="mt-2 text-sm text-green-600">
-                  Selected: {imageFile.name}
+              {imageFiles.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-green-600 mb-2">
+                    Selected {imageFiles.length} image{imageFiles.length > 1 ? 's' : ''}:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {imageFiles.map((file, index) => (
+                      <div key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {file.name}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
