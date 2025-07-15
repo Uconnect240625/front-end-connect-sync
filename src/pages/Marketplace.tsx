@@ -11,7 +11,7 @@ interface Product {
   title: string;
   price: number;
   description: string;
-  image_url?: string;
+  image_urls?: string[];
   category: string;
   created_at: string;
   contact_phone?: string;
@@ -101,7 +101,13 @@ const Marketplace = () => {
             <p className="text-muted-foreground">Be the first to list a product!</p>
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map(product => <div key={product.id} className="bg-card rounded-xl shadow-lg overflow-hidden border border-border hover:shadow-xl transition-shadow">
-                {product.image_url && <img src={product.image_url} alt={product.title} className="w-full h-48 object-cover" />}
+                {product.image_urls && product.image_urls.length > 0 && (
+                  <img 
+                    src={product.image_urls[0]} 
+                    alt={product.title} 
+                    className="w-full h-48 object-cover" 
+                  />
+                )}
                 <div className="p-4">
                   <h3 className="font-semibold text-lg text-card-foreground mb-2">{product.title}</h3>
                   <p className="text-2xl font-bold text-green-600 mb-2">{formatPrice(product.price)}</p>
