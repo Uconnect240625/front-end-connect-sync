@@ -27,6 +27,7 @@ const Marketplace = () => {
   } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
   useEffect(() => {
     if (profile?.university_id) {
       fetchProducts();
@@ -54,6 +55,12 @@ const Marketplace = () => {
       setLoading(false);
     }
   };
+  const categories = ['All Categories', 'Books', 'Electronics', 'Clothing', 'Stationery', 'Others'];
+  
+  const filteredProducts = selectedCategory === 'All Categories' 
+    ? products 
+    : products.filter(product => product.category === selectedCategory);
+  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -86,21 +93,31 @@ const Marketplace = () => {
           <p className="text-muted-foreground">Buy & Sell with 1,000+ Students</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <Button variant="outline" className="bg-card border-border hover:bg-accent">
-            All Categories
-          </Button>
+        <div className="flex flex-wrap gap-2 justify-center mb-4">
+          {categories.map(category => (
+            <Button 
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"} 
+              className={selectedCategory === category ? "bg-primary text-primary-foreground" : "bg-card border-border hover:bg-accent"}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+        
+        <div className="flex justify-center mb-8">
           <Button onClick={() => navigate('/list-product')} className="bg-blue-600 hover:bg-blue-700 text-white">
             List your product (₹50)
           </Button>
         </div>
 
-        {products.length === 0 ? <div className="text-center py-12">
+        {filteredProducts.length === 0 ? <div className="text-center py-12">
             <div className="text-6xl mb-4">🛍️</div>
             <h3 className="text-xl font-semibold text-card-foreground mb-2">No Products Available</h3>
             <p className="text-muted-foreground">Be the first to list a product!</p>
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map(product => <div key={product.id} className="bg-card rounded-xl shadow-lg overflow-hidden border border-border hover:shadow-xl transition-shadow">
+            {filteredProducts.map(product => <div key={product.id} className="bg-card rounded-xl shadow-lg overflow-hidden border border-border hover:shadow-xl transition-shadow">
                 {product.image_url && <img src={product.image_url} alt={product.title} className="w-full h-48 object-cover" />}
                 <div className="p-4">
                   <h3 className="font-semibold text-lg text-card-foreground mb-2">{product.title}</h3>
