@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Navigation from '@/components/Navigation';
 interface Product {
   id: string;
   title: string;
   price: number;
   description: string;
-  image_url?: string;
+  image_urls?: string[];
   category: string;
   created_at: string;
   contact_phone?: string;
@@ -28,20 +29,28 @@ const Marketplace = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
+  const [showMyListings, setShowMyListings] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState<{[key: string]: number}>({});
   useEffect(() => {
     if (profile?.university_id) {
       fetchProducts();
     }
-  }, [profile?.university_id]);
+  }, [profile?.university_id, showMyListings]);
   const fetchProducts = async () => {
     if (!profile?.university_id) return;
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('marketplace_items').select('*').eq('university_id', profile.university_id).eq('approval_status', 'approved').order('created_at', {
-        ascending: false
-      });
+      let query = supabase
+        .from('marketplace_items')
+        .select('*')
+        .eq('university_id', profile.university_id)
+        .eq('approval_status', 'approved');
+      
+      if (showMyListings) {
+        query = query.eq('user_id', profile.id);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -54,6 +63,45 @@ const Marketplace = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const deleteProduct = async (productId: string) => {
+    try {
+      const { error } = await supabase
+        .from('marketplace_items')
+        .delete()
+        .eq('id', productId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Product deleted successfully"
+      });
+      
+      // Refresh the products list
+      fetchProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const navigateImage = (productId: string, direction: 'prev' | 'next', imageCount: number) => {
+    setCurrentImageIndex(prev => {
+      const current = prev[productId] || 0;
+      let newIndex;
+      if (direction === 'prev') {
+        newIndex = current === 0 ? imageCount - 1 : current - 1;
+      } else {
+        newIndex = current === imageCount - 1 ? 0 : current + 1;
+      }
+      return { ...prev, [productId]: newIndex };
+    });
   };
   const categories = ['All Categories', 'Books', 'Electronics', 'Clothing', 'Stationery', 'Others'];
   
@@ -106,7 +154,14 @@ const Marketplace = () => {
           ))}
         </div>
         
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center gap-4 mb-8">
+          <Button 
+            variant={showMyListings ? "default" : "outline"}
+            onClick={() => setShowMyListings(!showMyListings)}
+            className="mb-0"
+          >
+            {showMyListings ? "All Products" : "My Listings"}
+          </Button>
           <Button onClick={() => navigate('/list-product')} className="bg-blue-600 hover:bg-blue-700 text-white">
             List your product (₹50)
           </Button>
@@ -115,12 +170,73 @@ const Marketplace = () => {
         {filteredProducts.length === 0 ? <div className="text-center py-12">
             <div className="text-6xl mb-4">🛍️</div>
             <h3 className="text-xl font-semibold text-card-foreground mb-2">No Products Available</h3>
-            <p className="text-muted-foreground">Be the first to list a product!</p>
+            <p className="text-muted-foreground">{showMyListings ? "You haven't listed any products yet!" : "Be the first to list a product!"}</p>
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => <div key={product.id} className="bg-card rounded-xl shadow-lg overflow-hidden border border-border hover:shadow-xl transition-shadow">
-                {product.image_url && <img src={product.image_url} alt={product.title} className="w-full h-48 object-cover" />}
+                {product.image_urls && product.image_urls.length > 0 && (
+                  <div className="relative">
+                    <img 
+                      src={product.image_urls[currentImageIndex[product.id] || 0]} 
+                      alt={product.title} 
+                      className="w-full h-48 object-cover" 
+                    />
+                    
+                    {product.image_urls.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => navigateImage(product.id, 'prev', product.image_urls.length)}
+                          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition-colors"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <button
+                          onClick={() => navigateImage(product.id, 'next', product.image_urls.length)}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition-colors"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                        
+                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                          {product.image_urls.map((_, index) => (
+                            <div
+                              key={index}
+                              className={`w-2 h-2 rounded-full ${
+                                index === (currentImageIndex[product.id] || 0) ? 'bg-white' : 'bg-white/50'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+                
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg text-card-foreground mb-2">{product.title}</h3>
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-lg text-card-foreground">{product.title}</h3>
+                    {(product.user_id === profile?.id || profile?.role === 'admin') && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                            <Trash2 size={16} />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this product? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteProduct(product.id)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
+                  
                   <p className="text-2xl font-bold text-green-600 mb-2">{formatPrice(product.price)}</p>
                   <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
                   
@@ -128,14 +244,16 @@ const Marketplace = () => {
                     <p className="text-sm text-muted-foreground">{product.contact_phone || 'Contact via app'}</p>
                   </div>
                   
-                  <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white" onClick={() => {
-              toast({
-                title: "Contact Information",
-                description: `Contact seller at ${product.contact_phone || 'Contact via app'}`
-              });
-            }}>
-                    Contact Seller
-                  </Button>
+                  {product.user_id !== profile?.id && (
+                    <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white" onClick={() => {
+                      toast({
+                        title: "Contact Information",
+                        description: `Contact seller at ${product.contact_phone || 'Contact via app'}`
+                      });
+                    }}>
+                      Contact Seller
+                    </Button>
+                  )}
                 </div>
               </div>)}
           </div>}
