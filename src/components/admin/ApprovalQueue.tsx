@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ApprovalStatus } from '@/types/database';
@@ -198,20 +199,55 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleApproval(item.id, item.type, 'approved')}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    ✅ Approve
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleApproval(item.id, item.type, 'rejected')}
-                  >
-                    ❌ Reject
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        ✅ Approve
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Approve {getTypeLabel(item.type)}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to approve "{item.title}"? This will make it visible to all users.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleApproval(item.id, item.type, 'approved')}>
+                          Approve
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                      >
+                        ❌ Reject
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Reject {getTypeLabel(item.type)}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to reject "{item.title}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleApproval(item.id, item.type, 'rejected')}>
+                          Reject
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ))

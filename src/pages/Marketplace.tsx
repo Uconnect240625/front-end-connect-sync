@@ -67,6 +67,31 @@ const Marketplace = () => {
 
   const deleteProduct = async (productId: string) => {
     try {
+      // First, get the product to access its image URLs
+      const { data: product, error: fetchError } = await supabase
+        .from('marketplace_items')
+        .select('image_urls')
+        .eq('id', productId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Delete images from storage if they exist
+      if (product?.image_urls && product.image_urls.length > 0) {
+        for (const imageUrl of product.image_urls) {
+          // Extract the file path from the URL
+          const urlParts = imageUrl.split('/');
+          const fileName = urlParts[urlParts.length - 1];
+          
+          if (fileName) {
+            await supabase.storage
+              .from('product-images')
+              .remove([fileName]);
+          }
+        }
+      }
+
+      // Delete the product from database
       const { error } = await supabase
         .from('marketplace_items')
         .delete()
@@ -76,7 +101,7 @@ const Marketplace = () => {
       
       toast({
         title: "Success",
-        description: "Product deleted successfully"
+        description: "Product and images deleted successfully"
       });
       
       // Refresh the products list
