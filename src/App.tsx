@@ -183,7 +183,7 @@ const App = () => (
               <Route
                 path="/post-club-event"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requiredRole={['club']}>
                     <PostClubEvent />
                   </ProtectedRoute>
                 }
@@ -223,7 +223,7 @@ const App = () => (
               <Route
                 path="/club-dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requiredRole={['club']}>
                     <ClubDashboard />
                   </ProtectedRoute>
                 }
