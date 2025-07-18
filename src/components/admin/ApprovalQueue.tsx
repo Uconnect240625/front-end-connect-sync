@@ -117,14 +117,16 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
   };
 
   const renderItemDetails = (item: ApprovalItem) => {
+    console.log('Rendering item details for:', item);
+    
     if (item.type === 'roommate_request') {
       return (
         <div className="space-y-2">
-          <p className="text-sm text-gray-600"><strong>Requester:</strong> {item.requester_name}</p>
-          <p className="text-sm text-gray-600"><strong>Gender:</strong> {item.gender}</p>
-          <p className="text-sm text-gray-600"><strong>Budget:</strong> ₹{item.budget}</p>
-          <p className="text-sm text-gray-600"><strong>Location:</strong> {item.location}</p>
-          <p className="text-sm text-gray-600"><strong>Contact:</strong> {item.contact_number}</p>
+          <p className="text-sm text-gray-600"><strong>Requester:</strong> {item.requester_name || 'N/A'}</p>
+          <p className="text-sm text-gray-600"><strong>Gender:</strong> {item.gender || 'N/A'}</p>
+          <p className="text-sm text-gray-600"><strong>Budget:</strong> ₹{item.budget || 'N/A'}</p>
+          <p className="text-sm text-gray-600"><strong>Location:</strong> {item.location || 'N/A'}</p>
+          <p className="text-sm text-gray-600"><strong>Contact:</strong> {item.contact_number || 'N/A'}</p>
           {item.preferences && (
             <p className="text-sm text-gray-600"><strong>Preferences:</strong> {item.preferences}</p>
           )}
@@ -135,8 +137,8 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
     if (item.type === 'marketplace_item') {
       return (
         <div className="space-y-2">
-          <p className="text-sm text-gray-600"><strong>Price:</strong> ₹{item.price}</p>
-          <p className="text-sm text-gray-600"><strong>Category:</strong> {item.category}</p>
+          <p className="text-sm text-gray-600"><strong>Price:</strong> ₹{item.price || 'N/A'}</p>
+          <p className="text-sm text-gray-600"><strong>Category:</strong> {item.category || 'N/A'}</p>
           {item.contact_phone && (
             <p className="text-sm text-gray-600"><strong>Contact:</strong> {item.contact_phone}</p>
           )}
@@ -232,6 +234,8 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
       <p className="text-sm text-gray-600"><strong>By:</strong> {item.user_name}</p>
     );
   };
+
+  console.log('ApprovalQueue received items:', items);
 
   return (
     <Card>

@@ -45,29 +45,29 @@ const AdminDashboard = () => {
       
       console.log('Loading dashboard data for university:', profile?.university_id);
       
-      // Load pending approvals from all tables including roommate requests with all details
+      // Load pending approvals from all tables with complete field sets
       const [pgListings, marketplaceItems, clubEvents, roommateRequests, complaintsData, notificationsData] = await Promise.all([
         supabase
           .from('pg_listings')
-          .select('*')
+          .select('id, title, description, price, location, contact_phone, type as pg_type, is_paid, approval_status, created_at, user_id, university_id')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
         supabase
           .from('marketplace_items')
-          .select('*')
+          .select('id, title, description, price, category, contact_phone, image_urls, is_paid, approval_status, created_at, user_id, university_id')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
         supabase
           .from('club_events')
-          .select('*')
+          .select('id, title, description, event_date, event_time, location, club_id, is_paid, approval_status, created_at, university_id')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
         supabase
           .from('roommate_requests')
-          .select('*')
+          .select('id, requester_name, gender, budget, location, contact_number, preferences, approval_status, created_at, user_id, university_id')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
@@ -85,7 +85,12 @@ const AdminDashboard = () => {
           .eq('university_id', profile?.university_id)
       ]);
 
-      // Combine approval items with all their details
+      console.log('PG Listings data:', pgListings.data);
+      console.log('Marketplace Items data:', marketplaceItems.data);
+      console.log('Club Events data:', clubEvents.data);
+      console.log('Roommate Requests data:', roommateRequests.data);
+
+      // Combine approval items with all their details and proper type mapping
       const allApprovalItems = [
         ...(pgListings.data || []).map(item => ({
           ...item,
@@ -107,6 +112,8 @@ const AdminDashboard = () => {
           is_paid: false // Roommate requests don't have payment
         }))
       ];
+
+      console.log('Combined approval items:', allApprovalItems);
 
       setApprovalItems(allApprovalItems);
       setComplaints(complaintsData.data || []);
