@@ -92,19 +92,23 @@ const AdminDashboard = () => {
 
       // Combine approval items with all their details and proper type mapping
       const allApprovalItems = [
+        // Handle PG listings with null check
         ...(pgListings.data || []).map(item => ({
           ...item,
           type: 'pg_listing' as const
         })),
+        // Handle marketplace items with null check
         ...(marketplaceItems.data || []).map(item => ({
           ...item,
           type: 'marketplace_item' as const
         })),
+        // Handle club events with null check
         ...(clubEvents.data || []).map(item => ({
           ...item,
           type: 'club_event' as const,
           is_paid: item.is_paid || false // Ensure is_paid is boolean
         })),
+        // Handle roommate requests with null check
         ...(roommateRequests.data || []).map(item => ({
           ...item,
           type: 'roommate_request' as const,
