@@ -45,7 +45,7 @@ const AdminDashboard = () => {
       
       console.log('Loading dashboard data for university:', profile?.university_id);
       
-      // Load pending approvals from all tables including roommate requests
+      // Load pending approvals from all tables including roommate requests with all details
       const [pgListings, marketplaceItems, clubEvents, roommateRequests, complaintsData, notificationsData] = await Promise.all([
         supabase
           .from('pg_listings')
@@ -85,7 +85,7 @@ const AdminDashboard = () => {
           .eq('university_id', profile?.university_id)
       ]);
 
-      // Combine approval items
+      // Combine approval items with all their details
       const allApprovalItems = [
         ...(pgListings.data || []).map(item => ({
           ...item,
@@ -97,7 +97,8 @@ const AdminDashboard = () => {
         })),
         ...(clubEvents.data || []).map(item => ({
           ...item,
-          type: 'club_event' as const
+          type: 'club_event' as const,
+          is_paid: item.is_paid || false // Ensure is_paid is boolean
         })),
         ...(roommateRequests.data || []).map(item => ({
           ...item,
