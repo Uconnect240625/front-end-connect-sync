@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navigation from '@/components/Navigation';
 
@@ -16,6 +15,23 @@ const PostClubEvent = () => {
     setFormData({
       ...formData,
       [e.target.id]: e.target.value
+    });
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    let formattedValue = inputValue.replace(/\D/g, ''); // Remove non-digits
+    
+    if (formattedValue.length >= 2) {
+      formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2);
+    }
+    if (formattedValue.length >= 5) {
+      formattedValue = formattedValue.substring(0, 5) + '/' + formattedValue.substring(5, 9);
+    }
+    
+    setFormData({
+      ...formData,
+      eventDate: formattedValue
     });
   };
 
@@ -63,10 +79,12 @@ const PostClubEvent = () => {
             <div className="mb-4">
               <label htmlFor="eventDate" className="block font-medium mb-2">Date</label>
               <input 
-                type="date" 
+                type="text" 
                 id="eventDate" 
                 value={formData.eventDate}
-                onChange={handleInputChange}
+                onChange={handleDateChange}
+                placeholder="DD/MM/YYYY"
+                maxLength={10}
                 required 
                 className="w-full p-3 border border-gray-300 rounded-lg"
               />
