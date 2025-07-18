@@ -92,24 +92,24 @@ const AdminDashboard = () => {
 
       // Combine approval items with all their details and proper type mapping
       const allApprovalItems = [
-        // Handle PG listings with null check
-        ...(pgListings.data || []).map(item => ({
+        // Handle PG listings with proper type checking
+        ...(pgListings.data?.filter(Boolean) || []).map(item => ({
           ...item,
           type: 'pg_listing' as const
         })),
-        // Handle marketplace items with null check
-        ...(marketplaceItems.data || []).map(item => ({
+        // Handle marketplace items with proper type checking
+        ...(marketplaceItems.data?.filter(Boolean) || []).map(item => ({
           ...item,
           type: 'marketplace_item' as const
         })),
-        // Handle club events with null check
-        ...(clubEvents.data || []).map(item => ({
+        // Handle club events with proper type checking
+        ...(clubEvents.data?.filter(Boolean) || []).map(item => ({
           ...item,
           type: 'club_event' as const,
           is_paid: item.is_paid || false // Ensure is_paid is boolean
         })),
-        // Handle roommate requests with null check
-        ...(roommateRequests.data || []).map(item => ({
+        // Handle roommate requests with proper type checking
+        ...(roommateRequests.data?.filter(Boolean) || []).map(item => ({
           ...item,
           type: 'roommate_request' as const,
           title: `Roommate Request by ${item.requester_name}`,
