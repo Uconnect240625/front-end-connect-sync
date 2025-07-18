@@ -1,7 +1,13 @@
+
 import React, { useState } from 'react';
 import Navigation from '@/components/Navigation';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const PostClubEvent = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     eventName: '',
     eventDesc: '',
@@ -10,6 +16,7 @@ const PostClubEvent = () => {
     location: '',
     clubName: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -35,9 +42,70 @@ const PostClubEvent = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const parseDateToISO = (dateString: string) => {
+    const [day, month, year] = dateString.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('✅ Event submitted for approval! Payment of ₹50 required.');
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit an event.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Parse the date from DD/MM/YYYY to YYYY-MM-DD for database
+      const parsedDate = parseDateToISO(formData.eventDate);
+
+      const { error } = await supabase
+        .from('club_events')
+        .insert({
+          title: formData.eventName,
+          description: formData.eventDesc,
+          event_date: parsedDate,
+          event_time: formData.eventTime,
+          location: formData.location,
+          club_id: user.id,
+          university_id: (await supabase.from('profiles').select('university_id').eq('id', user.id).single()).data?.university_id,
+          approval_status: 'pending',
+          is_paid: false
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Event submitted for approval!",
+      });
+
+      // Reset form
+      setFormData({
+        eventName: '',
+        eventDesc: '',
+        eventDate: '',
+        eventTime: '',
+        location: '',
+        clubName: ''
+      });
+
+    } catch (error) {
+      console.error('Error submitting event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit event. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -130,9 +198,10 @@ const PostClubEvent = () => {
 
             <button 
               type="submit" 
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-red-600 transition-colors"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit & Pay ₹50
+              {isSubmitting ? 'Submitting...' : 'Submit & Pay ₹50'}
             </button>
           </form>
 
