@@ -45,29 +45,29 @@ const AdminDashboard = () => {
       
       console.log('Loading dashboard data for university:', profile?.university_id);
       
-      // Load pending approvals from all tables with complete field sets
+      // Load pending approvals from all tables including roommate requests with all details
       const [pgListings, marketplaceItems, clubEvents, roommateRequests, complaintsData, notificationsData] = await Promise.all([
         supabase
           .from('pg_listings')
-          .select('id, title, description, price, location, contact_phone, type as pg_type, is_paid, approval_status, created_at, user_id, university_id')
+          .select('*')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
         supabase
           .from('marketplace_items')
-          .select('id, title, description, price, category, contact_phone, image_urls, is_paid, approval_status, created_at, user_id, university_id')
+          .select('*')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
         supabase
           .from('club_events')
-          .select('id, title, description, event_date, event_time, location, club_id, is_paid, approval_status, created_at, university_id')
+          .select('*')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
         supabase
           .from('roommate_requests')
-          .select('id, requester_name, gender, budget, location, contact_number, preferences, approval_status, created_at, user_id, university_id')
+          .select('*')
           .eq('university_id', profile?.university_id)
           .eq('approval_status', 'pending'),
         
@@ -85,39 +85,28 @@ const AdminDashboard = () => {
           .eq('university_id', profile?.university_id)
       ]);
 
-      console.log('PG Listings data:', pgListings.data);
-      console.log('Marketplace Items data:', marketplaceItems.data);
-      console.log('Club Events data:', clubEvents.data);
-      console.log('Roommate Requests data:', roommateRequests.data);
-
-      // Combine approval items with all their details and proper type mapping
+      // Combine approval items with all their details
       const allApprovalItems = [
-        // Handle PG listings with proper type checking
-        ...(pgListings.data?.filter(Boolean) || []).map(item => ({
+        ...(pgListings.data || []).map(item => ({
           ...item,
           type: 'pg_listing' as const
         })),
-        // Handle marketplace items with proper type checking
-        ...(marketplaceItems.data?.filter(Boolean) || []).map(item => ({
+        ...(marketplaceItems.data || []).map(item => ({
           ...item,
           type: 'marketplace_item' as const
         })),
-        // Handle club events with proper type checking
-        ...(clubEvents.data?.filter(Boolean) || []).map(item => ({
+        ...(clubEvents.data || []).map(item => ({
           ...item,
           type: 'club_event' as const,
           is_paid: item.is_paid || false // Ensure is_paid is boolean
         })),
-        // Handle roommate requests with proper type checking
-        ...(roommateRequests.data?.filter(Boolean) || []).map(item => ({
+        ...(roommateRequests.data || []).map(item => ({
           ...item,
           type: 'roommate_request' as const,
           title: `Roommate Request by ${item.requester_name}`,
           is_paid: false // Roommate requests don't have payment
         }))
       ];
-
-      console.log('Combined approval items:', allApprovalItems);
 
       setApprovalItems(allApprovalItems);
       setComplaints(complaintsData.data || []);
