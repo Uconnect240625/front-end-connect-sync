@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -16,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const announcementSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  type: z.enum(['official', 'student']),
+  type: z.enum(['official', 'club']),
   category: z.string().min(1, 'Category is required'),
   content: z.string().min(1, 'Content is required'),
 });
@@ -128,7 +127,7 @@ const AnnouncementForm = () => {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="official">🏛️ Official</SelectItem>
-                          <SelectItem value="student">🎓 Student</SelectItem>
+                          <SelectItem value="club">🎭 Club</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
