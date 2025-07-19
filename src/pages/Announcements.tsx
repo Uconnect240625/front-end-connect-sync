@@ -139,13 +139,13 @@ const Announcements = () => {
           </button>
           <button
             className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === 'student'
+              activeTab === 'club'
                 ? 'bg-blue-600 text-white dark:bg-blue-500'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
-            onClick={() => setActiveTab('student')}
+            onClick={() => setActiveTab('club')}
           >
-            🎓 Student
+            🎭 Club
           </button>
         </div>
 
