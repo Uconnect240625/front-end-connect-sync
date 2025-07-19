@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,15 +64,24 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
 
       if (error) {
         console.error('Supabase error:', error);
-        throw error;
+        
+        // Provide more specific error messages
+        if (error.code === '42501') {
+          toast.error('Permission denied. You may not have admin privileges for this action.');
+        } else if (error.code === '23503') {
+          toast.error('Database constraint error. Please check the data integrity.');
+        } else {
+          toast.error(`Database error: ${error.message}`);
+        }
+        return;
       }
 
       console.log('Update successful:', data);
-      toast.success(`Item ${status} successfully`);
+      toast.success(`${type.replace('_', ' ')} ${status} successfully`);
       onApprovalChange();
     } catch (error) {
       console.error('Error updating approval status:', error);
-      toast.error('Failed to update approval status');
+      toast.error('Unexpected error occurred. Please try again.');
     }
   };
 

@@ -1,244 +1,132 @@
+
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import Navigation from '@/components/Navigation';
-import AdminStats from '@/components/admin/AdminStats';
-import ApprovalQueue from '@/components/admin/ApprovalQueue';
-import ComplaintsManager from '@/components/admin/ComplaintsManager';
-import NotificationManager from '@/components/admin/NotificationManager';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { BarChart3, DollarSign, UtensilsCrossed, Users, FileText, Building, Calendar, ShoppingBag, Bell } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import ApprovalQueue from '@/components/admin/ApprovalQueue';
+import AdminStats from '@/components/admin/AdminStats';
+import ComplaintsManager from '@/components/admin/ComplaintsManager';
+import NotificationManager from '@/components/admin/NotificationManager';
 
 const AdminDashboard = () => {
-  const { profile } = useAuth();
-  const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    pendingApprovals: 0,
-    totalRevenue: 0,
-    activeUsers: 0,
-    pendingComplaints: 0,
-    totalNotifications: 0
-  });
   const [approvalItems, setApprovalItems] = useState([]);
-  const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    if (!profile) return;
-    
-    if (profile.role !== 'admin') {
-      toast.error('Access denied. Admin privileges required.');
-      navigate('/');
-      return;
-    }
-
-    loadDashboardData();
-  }, [profile, navigate]);
-
-  const loadDashboardData = async () => {
+  const fetchApprovalItems = async () => {
     try {
       setLoading(true);
       
-      console.log('Loading dashboard data for university:', profile?.university_id);
-      
-      // Load pending approvals from all tables including roommate requests with all details
-      const [pgListings, marketplaceItems, clubEvents, roommateRequests, complaintsData, notificationsData, clubProfiles] = await Promise.all([
+      // Get user's university_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('university_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.university_id) {
+        toast.error('Could not determine your university');
+        return;
+      }
+
+      // Fetch pending items from all tables
+      const [pgListings, marketplaceItems, clubEvents, roommateRequests] = await Promise.all([
         supabase
           .from('pg_listings')
-          .select('*')
-          .eq('university_id', profile?.university_id)
-          .eq('approval_status', 'pending'),
+          .select(`
+            *,
+            profiles!inner(full_name)
+          `)
+          .eq('approval_status', 'pending')
+          .eq('university_id', profile.university_id),
         
         supabase
           .from('marketplace_items')
-          .select('*')
-          .eq('university_id', profile?.university_id)
-          .eq('approval_status', 'pending'),
+          .select(`
+            *,
+            profiles!inner(full_name)
+          `)
+          .eq('approval_status', 'pending')
+          .eq('university_id', profile.university_id),
         
         supabase
           .from('club_events')
-          .select('*')
-          .eq('university_id', profile?.university_id)
-          .eq('approval_status', 'pending'),
+          .select(`
+            *,
+            profiles!inner(full_name)
+          `)
+          .eq('approval_status', 'pending')
+          .eq('university_id', profile.university_id),
         
         supabase
           .from('roommate_requests')
           .select('*')
-          .eq('university_id', profile?.university_id)
-          .eq('approval_status', 'pending'),
-        
-        // Load all complaints (not just unresolved ones)
-        supabase
-          .from('complaints')
-          .select('*')
-          .eq('university_id', profile?.university_id)
-          .order('created_at', { ascending: false }),
-
-        // Load notifications count
-        supabase
-          .from('notifications')
-          .select('id')
-          .eq('university_id', profile?.university_id),
-
-        // Load club profiles for club names
-        supabase
-          .from('profiles')
-          .select('id, full_name')
-          .eq('role', 'club')
-          .eq('university_id', profile?.university_id)
+          .eq('approval_status', 'pending')
+          .eq('university_id', profile.university_id)
       ]);
 
-      // Create club lookup map
-      const clubLookup = (clubProfiles.data || []).reduce((acc, club) => {
-        acc[club.id] = club.full_name;
-        return acc;
-      }, {} as Record<string, string>);
-
-      // Combine approval items with all their details
-      const allApprovalItems = [
+      // Transform data for ApprovalQueue
+      const items = [
         ...(pgListings.data || []).map(item => ({
           ...item,
-          type: 'pg_listing' as const
+          type: 'pg_listing',
+          user_name: item.profiles?.full_name
         })),
         ...(marketplaceItems.data || []).map(item => ({
           ...item,
-          type: 'marketplace_item' as const
+          type: 'marketplace_item',
+          user_name: item.profiles?.full_name
         })),
         ...(clubEvents.data || []).map(item => ({
           ...item,
-          type: 'club_event' as const,
-          is_paid: item.is_paid || false, // Ensure is_paid is boolean
-          club_name: clubLookup[item.club_id] || 'Unknown Club'
+          type: 'club_event',
+          user_name: item.profiles?.full_name,
+          club_name: item.profiles?.full_name // Use the club's full name as club name
         })),
         ...(roommateRequests.data || []).map(item => ({
           ...item,
-          type: 'roommate_request' as const,
-          title: `Roommate Request by ${item.requester_name}`,
-          is_paid: false // Roommate requests don't have payment
+          type: 'roommate_request'
         }))
       ];
 
-      setApprovalItems(allApprovalItems);
-      setComplaints(complaintsData.data || []);
-
-      console.log('Loaded complaints:', complaintsData.data);
-
-      // Calculate stats - use is_paid field instead of payment_status
-      const paidItems = allApprovalItems.filter(item => item.is_paid === true);
-      const totalRevenue = paidItems.length * 50; // Assuming ₹50 per paid item
-
-      // Count pending complaints (not resolved/closed)
-      const pendingComplaints = (complaintsData.data || []).filter(
-        complaint => complaint.status !== 'resolved' && complaint.status !== 'closed'
-      ).length;
-
-      setStats({
-        pendingApprovals: allApprovalItems.length,
-        totalRevenue,
-        activeUsers: 0, // This would need a separate query
-        pendingComplaints,
-        totalNotifications: notificationsData.data?.length || 0
-      });
-
+      setApprovalItems(items);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      toast.error('Failed to load dashboard data');
+      console.error('Error fetching approval items:', error);
+      toast.error('Failed to load approval items');
     } finally {
       setLoading(false);
     }
   };
 
-  const quickActions = [
-    {
-      title: 'Analytics Dashboard',
-      description: 'View detailed analytics and insights',
-      icon: BarChart3,
-      action: () => navigate('/admin/analytics'),
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Revenue Management',
-      description: 'Track earnings and financial data',
-      icon: DollarSign,
-      action: () => navigate('/admin/revenue'),
-      color: 'bg-green-500'
-    },
-    {
-      title: 'Manage Mess Menu',
-      description: 'Update weekly mess menu',
-      icon: UtensilsCrossed,
-      action: () => navigate('/mess-menu-admin'),
-      color: 'bg-orange-500'
+  useEffect(() => {
+    if (user) {
+      fetchApprovalItems();
     }
-  ];
+  }, [user]);
 
-  if (!profile || profile.role !== 'admin') {
-    return null;
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
       
-      <div className="max-w-7xl mx-auto pt-8 px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage university operations and approvals</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <AdminStats />
+          <ApprovalQueue items={approvalItems} onApprovalChange={fetchApprovalItems} />
         </div>
-
-        <AdminStats stats={stats} />
-
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {quickActions.map((action, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow border-border bg-card" onClick={action.action}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${action.color} text-white`}>
-                      <action.icon size={24} />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg text-card-foreground">{action.title}</CardTitle>
-                      <CardDescription className="text-muted-foreground">{action.description}</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+        
+        <div className="space-y-6">
+          <ComplaintsManager />
+          <NotificationManager />
         </div>
-
-        <Tabs defaultValue="approvals" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-muted">
-            <TabsTrigger value="approvals" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Pending Approvals ({stats.pendingApprovals})</TabsTrigger>
-            <TabsTrigger value="complaints" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Complaints ({complaints.length})</TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Notifications ({stats.totalNotifications})</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="approvals">
-            <ApprovalQueue 
-              items={approvalItems} 
-              onApprovalChange={loadDashboardData}
-            />
-          </TabsContent>
-
-          <TabsContent value="complaints">
-            <ComplaintsManager 
-              complaints={complaints} 
-              onComplaintUpdate={loadDashboardData}
-            />
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <NotificationManager />
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );
