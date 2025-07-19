@@ -11,6 +11,13 @@ import NotificationManager from '@/components/admin/NotificationManager';
 
 const AdminDashboard = () => {
   const [approvalItems, setApprovalItems] = useState([]);
+  const [complaints, setComplaints] = useState([]);
+  const [stats, setStats] = useState({
+    pendingApprovals: 0,
+    totalUsers: 0,
+    totalComplaints: 0,
+    resolvedComplaints: 0
+  });
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -30,32 +37,23 @@ const AdminDashboard = () => {
         return;
       }
 
-      // Fetch pending items from all tables
+      // Fetch pending items from all tables without joins first
       const [pgListings, marketplaceItems, clubEvents, roommateRequests] = await Promise.all([
         supabase
           .from('pg_listings')
-          .select(`
-            *,
-            profiles!inner(full_name)
-          `)
+          .select('*')
           .eq('approval_status', 'pending')
           .eq('university_id', profile.university_id),
         
         supabase
           .from('marketplace_items')
-          .select(`
-            *,
-            profiles!inner(full_name)
-          `)
+          .select('*')
           .eq('approval_status', 'pending')
           .eq('university_id', profile.university_id),
         
         supabase
           .from('club_events')
-          .select(`
-            *,
-            profiles!inner(full_name)
-          `)
+          .select('*')
           .eq('approval_status', 'pending')
           .eq('university_id', profile.university_id),
         
@@ -66,31 +64,55 @@ const AdminDashboard = () => {
           .eq('university_id', profile.university_id)
       ]);
 
+      // Get all unique user IDs from the results
+      const allUserIds = [
+        ...(pgListings.data || []).map(item => item.user_id),
+        ...(marketplaceItems.data || []).map(item => item.user_id),
+        ...(clubEvents.data || []).map(item => item.club_id),
+        ...(roommateRequests.data || []).map(item => item.user_id)
+      ].filter(Boolean);
+
+      // Fetch profile data for all users
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', [...new Set(allUserIds)]);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
+
       // Transform data for ApprovalQueue
       const items = [
         ...(pgListings.data || []).map(item => ({
           ...item,
           type: 'pg_listing',
-          user_name: item.profiles?.full_name
+          user_name: profileMap.get(item.user_id) || 'Unknown User'
         })),
         ...(marketplaceItems.data || []).map(item => ({
           ...item,
           type: 'marketplace_item',
-          user_name: item.profiles?.full_name
+          user_name: profileMap.get(item.user_id) || 'Unknown User'
         })),
         ...(clubEvents.data || []).map(item => ({
           ...item,
           type: 'club_event',
-          user_name: item.profiles?.full_name,
-          club_name: item.profiles?.full_name // Use the club's full name as club name
+          user_name: profileMap.get(item.club_id) || 'Unknown Club',
+          club_name: profileMap.get(item.club_id) || 'Unknown Club'
         })),
         ...(roommateRequests.data || []).map(item => ({
           ...item,
-          type: 'roommate_request'
+          type: 'roommate_request',
+          user_name: profileMap.get(item.user_id) || 'Unknown User'
         }))
       ];
 
       setApprovalItems(items);
+
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        pendingApprovals: items.length
+      }));
+
     } catch (error) {
       console.error('Error fetching approval items:', error);
       toast.error('Failed to load approval items');
@@ -99,11 +121,76 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchComplaints = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('university_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.university_id) return;
+
+      const { data: complaintsData } = await supabase
+        .from('complaints')
+        .select('*')
+        .eq('university_id', profile.university_id)
+        .order('created_at', { ascending: false });
+
+      setComplaints(complaintsData || []);
+
+      // Update stats
+      const totalComplaints = complaintsData?.length || 0;
+      const resolvedComplaints = complaintsData?.filter(c => c.status === 'resolved').length || 0;
+
+      setStats(prev => ({
+        ...prev,
+        totalComplaints,
+        resolvedComplaints
+      }));
+
+    } catch (error) {
+      console.error('Error fetching complaints:', error);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('university_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.university_id) return;
+
+      // Get total users count
+      const { count: totalUsers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('university_id', profile.university_id);
+
+      setStats(prev => ({
+        ...prev,
+        totalUsers: totalUsers || 0
+      }));
+
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchApprovalItems();
+      fetchComplaints();
+      fetchStats();
     }
   }, [user]);
+
+  const handleComplaintUpdate = () => {
+    fetchComplaints();
+  };
 
   if (loading) {
     return (
@@ -119,12 +206,12 @@ const AdminDashboard = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <AdminStats />
+          <AdminStats stats={stats} />
           <ApprovalQueue items={approvalItems} onApprovalChange={fetchApprovalItems} />
         </div>
         
         <div className="space-y-6">
-          <ComplaintsManager />
+          <ComplaintsManager complaints={complaints} onComplaintUpdate={handleComplaintUpdate} />
           <NotificationManager />
         </div>
       </div>
