@@ -64,13 +64,9 @@ const UConnect = () => {
             <div className="flex gap-2 justify-center flex-wrap">
               
               
-              <button onClick={() => navigate('/post-roommate-request')} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
-                🏠 Post Roommate Request
-              </button>
               
-              <button onClick={() => navigate('/upload-notes')} className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">
-                📤 Upload Notes
-              </button>
+              
+              
               
               <button onClick={() => navigate('/settings')} className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm">
                 ⚙️ Settings
