@@ -46,7 +46,7 @@ const AdminDashboard = () => {
       console.log('Loading dashboard data for university:', profile?.university_id);
       
       // Load pending approvals from all tables including roommate requests with all details
-      const [pgListings, marketplaceItems, clubEvents, roommateRequests, complaintsData, notificationsData, clubProfiles] = await Promise.all([
+      const [pgListings, marketplaceItems, clubEvents, roommateRequests, complaintsData, notificationsData] = await Promise.all([
         supabase
           .from('pg_listings')
           .select('*')
@@ -82,21 +82,8 @@ const AdminDashboard = () => {
         supabase
           .from('notifications')
           .select('id')
-          .eq('university_id', profile?.university_id),
-
-        // Load club profiles for club names
-        supabase
-          .from('profiles')
-          .select('id, full_name')
-          .eq('role', 'club')
           .eq('university_id', profile?.university_id)
       ]);
-
-      // Create club lookup map
-      const clubLookup = (clubProfiles.data || []).reduce((acc, club) => {
-        acc[club.id] = club.full_name;
-        return acc;
-      }, {} as Record<string, string>);
 
       // Combine approval items with all their details
       const allApprovalItems = [
@@ -111,8 +98,7 @@ const AdminDashboard = () => {
         ...(clubEvents.data || []).map(item => ({
           ...item,
           type: 'club_event' as const,
-          is_paid: item.is_paid || false, // Ensure is_paid is boolean
-          club_name: clubLookup[item.club_id] || 'Unknown Club'
+          is_paid: item.is_paid || false // Ensure is_paid is boolean
         })),
         ...(roommateRequests.data || []).map(item => ({
           ...item,

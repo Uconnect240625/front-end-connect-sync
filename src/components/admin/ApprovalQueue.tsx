@@ -34,7 +34,6 @@ interface ApprovalItem {
   event_date?: string;
   event_time?: string;
   club_id?: string;
-  club_name?: string;
   // Additional fields for PG listings
   pg_type?: string;
 }
@@ -49,26 +48,17 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
   
   const handleApproval = async (itemId: string, type: string, status: 'approved' | 'rejected') => {
     try {
-      console.log('Attempting to update approval:', { itemId, type, status });
-      
       const tableName = type === 'pg_listing' ? 'pg_listings' : 
                        type === 'marketplace_item' ? 'marketplace_items' : 
                        type === 'club_event' ? 'club_events' : 'roommate_requests';
       
-      console.log('Using table:', tableName);
-      
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from(tableName)
         .update({ approval_status: status })
-        .eq('id', itemId)
-        .select();
+        .eq('id', itemId);
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Update successful:', data);
       toast.success(`Item ${status} successfully`);
       onApprovalChange();
     } catch (error) {
@@ -209,8 +199,8 @@ const ApprovalQueue = ({ items, onApprovalChange }: ApprovalQueueProps) => {
           {item.location && (
             <p className="text-sm text-gray-600"><strong>Location:</strong> {item.location}</p>
           )}
-          {item.club_name && (
-            <p className="text-sm text-gray-600"><strong>Club:</strong> {item.club_name}</p>
+          {item.club_id && (
+            <p className="text-sm text-gray-600"><strong>Club ID:</strong> {item.club_id}</p>
           )}
         </div>
       );
