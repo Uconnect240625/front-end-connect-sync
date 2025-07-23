@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar } from 'lucide-react';
+import { Calendar, Settings, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface Event {
   id: string;
@@ -15,32 +17,40 @@ interface Event {
   approval_status: string;
 }
 
+interface OfficialEvent {
+  id?: string;
+  date: string;
+  title: string;
+  description: string;
+  location: string;
+}
+
 const EventCalendar = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState('official');
   const [clubEvents, setClubEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const switchTab = (tab: string) => {
-    setActiveTab(tab);
-  };
-
-  // Static official events (as per original)
-  const officialEvents = [
+  const [officialEvents, setOfficialEvents] = useState<OfficialEvent[]>([
     {
+      id: '1',
       date: '24 July',
       title: 'Orientation Day',
       description: 'Welcome session for 1st year students',
       location: 'Main Auditorium'
     },
     {
+      id: '2',
       date: '15 August',
       title: 'Independence Day Celebration',
       description: 'Flag hoisting and cultural show',
       location: 'Ground A'
     }
-  ];
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  const switchTab = (tab: string) => {
+    setActiveTab(tab);
+  };
 
   // Fetch club events from database
   useEffect(() => {
@@ -67,6 +77,58 @@ const EventCalendar = () => {
     fetchClubEvents();
   }, []);
 
+  // Delete official event (admin only)
+  const deleteOfficialEvent = (eventId: string) => {
+    if (profile?.role !== 'admin') return;
+    
+    setOfficialEvents(prev => prev.filter(event => event.id !== eventId));
+    toast.success('Official event deleted successfully');
+  };
+
+  // Delete club event (admin or club owner)
+  const deleteClubEvent = async (eventId: string) => {
+    try {
+      const { error } = await supabase
+        .from('club_events')
+        .delete()
+        .eq('id', eventId);
+
+      if (error) {
+        console.error('Error deleting club event:', error);
+        toast.error('Failed to delete club event');
+      } else {
+        setClubEvents(prev => prev.filter(event => event.id !== eventId));
+        toast.success('Club event deleted successfully');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to delete club event');
+    }
+  };
+
+  // Create new official event (admin only)
+  const createOfficialEvent = () => {
+    if (profile?.role !== 'admin') return;
+    
+    const title = prompt('Enter event title:');
+    const description = prompt('Enter event description:');
+    const location = prompt('Enter event location:');
+    const date = prompt('Enter event date (e.g., "25 July"):');
+    
+    if (title && description && location && date) {
+      const newEvent = {
+        id: Date.now().toString(),
+        title,
+        description,
+        location,
+        date
+      };
+      
+      setOfficialEvents(prev => [...prev, newEvent]);
+      toast.success('Official event created successfully');
+    }
+  };
+
   // Format date for display
   const formatEventDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -75,6 +137,11 @@ const EventCalendar = () => {
       month: 'long' 
     });
   };
+
+  // Check if user can delete events
+  const canDeleteOfficialEvents = profile?.role === 'admin';
+  const canDeleteClubEvents = profile?.role === 'admin' || profile?.role === 'club';
+  const canCreateOfficialEvents = profile?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -93,6 +160,32 @@ const EventCalendar = () => {
           </div>
           <p className="text-gray-600">Stay updated with all things happening</p>
         </header>
+
+        {/* Management Buttons */}
+        {(canDeleteOfficialEvents || canDeleteClubEvents || canCreateOfficialEvents) && (
+          <div className="flex justify-center gap-2 mb-4">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => toast.info('Manage mode: You can now delete events by clicking the delete buttons')}
+            >
+              <Settings className="w-4 h-4" />
+              Manage
+            </Button>
+            
+            {canCreateOfficialEvents && activeTab === 'official' && (
+              <Button 
+                size="sm"
+                className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800"
+                onClick={createOfficialEvent}
+              >
+                <Plus className="w-4 h-4" />
+                Create
+              </Button>
+            )}
+          </div>
+        )}
 
         <div className="flex justify-center gap-4 mb-6">
           <button
@@ -120,16 +213,30 @@ const EventCalendar = () => {
         <div className="space-y-4">
           {activeTab === 'official' ? (
             // Official events
-            officialEvents.map((event, index) => (
-              <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            officialEvents.map((event) => (
+              <div key={event.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                 <div className="flex gap-4">
                   <div className="text-blue-600 font-bold text-lg text-center min-w-[80px]">
                     {event.date}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-gray-800 mb-1">{event.title}</h3>
-                    <p className="text-gray-600 mb-2 text-sm">{event.description}</p>
-                    <span className="text-sm text-gray-500">{event.location}</span>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg text-gray-800 mb-1">{event.title}</h3>
+                        <p className="text-gray-600 mb-2 text-sm">{event.description}</p>
+                        <span className="text-sm text-gray-500">{event.location}</span>
+                      </div>
+                      {canDeleteOfficialEvents && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => deleteOfficialEvent(event.id!)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -149,14 +256,28 @@ const EventCalendar = () => {
                       {formatEventDate(event.event_date)}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-800 mb-1">{event.title}</h3>
-                      <p className="text-gray-600 mb-2 text-sm">{event.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">{event.location}</span>
-                        {event.event_time && (
-                          <span className="text-sm text-blue-600 font-medium">
-                            {event.event_time}
-                          </span>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg text-gray-800 mb-1">{event.title}</h3>
+                          <p className="text-gray-600 mb-2 text-sm">{event.description}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-500">{event.location}</span>
+                            {event.event_time && (
+                              <span className="text-sm text-blue-600 font-medium">
+                                {event.event_time}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {canDeleteClubEvents && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => deleteClubEvent(event.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         )}
                       </div>
                     </div>
