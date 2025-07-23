@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Settings, Plus, Trash2 } from 'lucide-react';
@@ -6,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { OfficialEventForm } from '@/components/admin/OfficialEventForm';
 
 interface Event {
   id: string;
@@ -47,6 +47,7 @@ const EventCalendar = () => {
     }
   ]);
   const [loading, setLoading] = useState(true);
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false);
 
   const switchTab = (tab: string) => {
     setActiveTab(tab);
@@ -107,26 +108,8 @@ const EventCalendar = () => {
   };
 
   // Create new official event (admin only)
-  const createOfficialEvent = () => {
-    if (profile?.role !== 'admin') return;
-    
-    const title = prompt('Enter event title:');
-    const description = prompt('Enter event description:');
-    const location = prompt('Enter event location:');
-    const date = prompt('Enter event date (e.g., "25 July"):');
-    
-    if (title && description && location && date) {
-      const newEvent = {
-        id: Date.now().toString(),
-        title,
-        description,
-        location,
-        date
-      };
-      
-      setOfficialEvents(prev => [...prev, newEvent]);
-      toast.success('Official event created successfully');
-    }
+  const handleEventCreated = (newEvent: OfficialEvent) => {
+    setOfficialEvents(prev => [...prev, newEvent]);
   };
 
   // Format date for display
@@ -178,7 +161,7 @@ const EventCalendar = () => {
               <Button 
                 size="sm"
                 className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800"
-                onClick={createOfficialEvent}
+                onClick={() => setIsEventFormOpen(true)}
               >
                 <Plus className="w-4 h-4" />
                 Create
@@ -301,6 +284,13 @@ const EventCalendar = () => {
             ➕ Add Club Event (₹50)
           </button>
         )}
+
+        {/* Official Event Form Modal */}
+        <OfficialEventForm
+          isOpen={isEventFormOpen}
+          onClose={() => setIsEventFormOpen(false)}
+          onEventCreated={handleEventCreated}
+        />
       </div>
     </div>
   );
