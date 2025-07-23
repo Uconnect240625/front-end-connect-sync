@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Settings, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -78,16 +78,28 @@ const EventCalendar = () => {
     fetchClubEvents();
   }, []);
 
-  // Delete official event (admin only)
+  // Delete official event (admin only) with confirmation
   const deleteOfficialEvent = (eventId: string) => {
     if (profile?.role !== 'admin') return;
+    
+    const event = officialEvents.find(e => e.id === eventId);
+    if (!event) return;
+
+    const confirmed = window.confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`);
+    if (!confirmed) return;
     
     setOfficialEvents(prev => prev.filter(event => event.id !== eventId));
     toast.success('Official event deleted successfully');
   };
 
-  // Delete club event (admin or club owner)
+  // Delete club event (admin or club owner) with confirmation
   const deleteClubEvent = async (eventId: string) => {
+    const event = clubEvents.find(e => e.id === eventId);
+    if (!event) return;
+
+    const confirmed = window.confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
     try {
       const { error } = await supabase
         .from('club_events')
@@ -125,6 +137,7 @@ const EventCalendar = () => {
   const canDeleteOfficialEvents = profile?.role === 'admin';
   const canDeleteClubEvents = profile?.role === 'admin' || profile?.role === 'club';
   const canCreateOfficialEvents = profile?.role === 'admin';
+  const canCreateClubEvents = profile?.role === 'club';
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -144,29 +157,23 @@ const EventCalendar = () => {
           <p className="text-gray-600">Stay updated with all things happening</p>
         </header>
 
-        {/* Management Buttons */}
-        {(canDeleteOfficialEvents || canDeleteClubEvents || canCreateOfficialEvents) && (
-          <div className="flex justify-center gap-2 mb-4">
+        {/* Create Button - Show for admins on official tab or clubs on club tab */}
+        {((canCreateOfficialEvents && activeTab === 'official') || (canCreateClubEvents && activeTab === 'club')) && (
+          <div className="flex justify-center mb-4">
             <Button 
-              variant="outline" 
               size="sm"
-              className="flex items-center gap-2"
-              onClick={() => toast.info('Manage mode: You can now delete events by clicking the delete buttons')}
+              className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800"
+              onClick={() => {
+                if (activeTab === 'official') {
+                  setIsEventFormOpen(true);
+                } else {
+                  navigate('/post-club-event');
+                }
+              }}
             >
-              <Settings className="w-4 h-4" />
-              Manage
+              <Plus className="w-4 h-4" />
+              Create {activeTab === 'official' ? 'Official Event' : 'Club Event'}
             </Button>
-            
-            {canCreateOfficialEvents && activeTab === 'official' && (
-              <Button 
-                size="sm"
-                className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800"
-                onClick={() => setIsEventFormOpen(true)}
-              >
-                <Plus className="w-4 h-4" />
-                Create
-              </Button>
-            )}
           </div>
         )}
 
@@ -274,16 +281,6 @@ const EventCalendar = () => {
             )
           )}
         </div>
-
-        {/* Add Club Event Button - Only show for club role */}
-        {profile?.role === 'club' && (
-          <button 
-            onClick={() => navigate('/post-club-event')}
-            className="fixed bottom-6 right-6 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center gap-2"
-          >
-            ➕ Add Club Event (₹50)
-          </button>
-        )}
 
         {/* Official Event Form Modal */}
         <OfficialEventForm
