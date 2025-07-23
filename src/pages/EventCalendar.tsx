@@ -4,8 +4,21 @@ import { Calendar, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 import { OfficialEventForm } from '@/components/admin/OfficialEventForm';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Event {
   id: string;
@@ -48,6 +61,17 @@ const EventCalendar = () => {
   ]);
   const [loading, setLoading] = useState(true);
   const [isEventFormOpen, setIsEventFormOpen] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    eventId: string;
+    eventTitle: string;
+    type: 'official' | 'club';
+  }>({
+    isOpen: false,
+    eventId: '',
+    eventTitle: '',
+    type: 'official'
+  });
 
   const switchTab = (tab: string) => {
     setActiveTab(tab);
@@ -78,44 +102,62 @@ const EventCalendar = () => {
     fetchClubEvents();
   }, []);
 
-  // Delete official event (admin only) with confirmation
+  // Delete official event (admin only) with confirmation modal
   const deleteOfficialEvent = (eventId: string) => {
     if (profile?.role !== 'admin') return;
     
     const event = officialEvents.find(e => e.id === eventId);
     if (!event) return;
 
-    const confirmed = window.confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`);
-    if (!confirmed) return;
-    
-    setOfficialEvents(prev => prev.filter(event => event.id !== eventId));
-    toast.success('Official event deleted successfully');
+    setDeleteDialog({
+      isOpen: true,
+      eventId,
+      eventTitle: event.title,
+      type: 'official'
+    });
   };
 
-  // Delete club event (admin or club owner) with confirmation
-  const deleteClubEvent = async (eventId: string) => {
+  // Delete club event (admin or club owner) with confirmation modal
+  const deleteClubEvent = (eventId: string) => {
     const event = clubEvents.find(e => e.id === eventId);
     if (!event) return;
 
-    const confirmed = window.confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`);
-    if (!confirmed) return;
+    setDeleteDialog({
+      isOpen: true,
+      eventId,
+      eventTitle: event.title,
+      type: 'club'
+    });
+  };
 
+  // Handle confirmed deletion
+  const handleConfirmedDelete = async () => {
+    const { eventId, type } = deleteDialog;
+    
     try {
-      const { error } = await supabase
-        .from('club_events')
-        .delete()
-        .eq('id', eventId);
-
-      if (error) {
-        console.error('Error deleting club event:', error);
-        toast.error('Failed to delete club event');
+      if (type === 'official') {
+        setOfficialEvents(prev => prev.filter(event => event.id !== eventId));
+        toast({ title: "Success", description: "Official event deleted successfully" });
       } else {
+        const { error } = await supabase
+          .from('club_events')
+          .delete()
+          .eq('id', eventId);
+
+        if (error) throw error;
+
         setClubEvents(prev => prev.filter(event => event.id !== eventId));
-        toast.success('Club event deleted successfully');
+        toast({ title: "Success", description: "Club event deleted successfully" });
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to delete club event');
+      console.error('Error deleting event:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete event. Please try again.",
+        variant: "destructive" 
+      });
+    } finally {
+      setDeleteDialog({ isOpen: false, eventId: '', eventTitle: '', type: 'official' });
     }
   };
 
@@ -288,6 +330,27 @@ const EventCalendar = () => {
           onClose={() => setIsEventFormOpen(false)}
           onEventCreated={handleEventCreated}
         />
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({ isOpen: false, eventId: '', eventTitle: '', type: 'official' })}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {deleteDialog.type === 'official' ? 'Official Event' : 'Club Event'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{deleteDialog.eventTitle}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmedDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
