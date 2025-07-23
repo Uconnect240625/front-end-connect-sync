@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import NotificationHeader from '@/components/notifications/NotificationHeader';
@@ -91,7 +92,7 @@ export default function Notifications() {
               {notification.title}
             </h3>
             <p className="text-gray-700 text-sm mb-2">
-              {notification.content}
+              {notification.message}
             </p>
             <div className="text-gray-500 text-xs text-right">
               {notification.created_at}
@@ -123,3 +124,4 @@ export default function Notifications() {
     </div>
   );
 }
+
