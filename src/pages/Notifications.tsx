@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { NotificationHeader } from '@/components/notifications/NotificationHeader';
-import { NotificationFilters } from '@/components/notifications/NotificationFilters';
-import { NotificationList } from '@/components/notifications/NotificationList';
+import NotificationHeader from '@/components/notifications/NotificationHeader';
+import NotificationFilters from '@/components/notifications/NotificationFilters';
+import NotificationList from '@/components/notifications/NotificationList';
 import { useNotifications } from '@/components/notifications/useNotifications';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export default function Notifications() {
-  const { notifications, filteredNotifications, activeFilter, setActiveFilter } = useNotifications();
+  const { notifications, activeFilter, setActiveFilter } = useNotifications();
   const { profile } = useAuth();
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -33,6 +33,12 @@ export default function Notifications() {
   });
 
   const canDeleteNotifications = profile?.role === 'admin';
+
+  // Filter notifications based on active filter
+  const filteredNotifications = notifications.filter(notification => {
+    if (activeFilter === 'All') return true;
+    return notification.type === activeFilter.toLowerCase();
+  });
 
   const handleDeleteNotification = (notificationId: string, title: string) => {
     if (!canDeleteNotifications) return;
