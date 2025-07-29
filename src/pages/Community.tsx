@@ -63,7 +63,10 @@ export default function Community() {
         console.log('Processing message:', msg);
         return {
           ...msg,
-          profiles: msg.profiles && typeof msg.profiles === 'object' && 'full_name' in msg.profiles 
+          profiles: msg.profiles && 
+                    typeof msg.profiles === 'object' && 
+                    msg.profiles !== null &&
+                    'full_name' in msg.profiles 
             ? msg.profiles as { full_name: string }
             : null
         };
