@@ -44,7 +44,7 @@ export default function Community() {
         .from('community_messages')
         .select(`
           *,
-          profiles!community_messages_user_id_fkey (
+          profiles (
             full_name
           )
         `)
