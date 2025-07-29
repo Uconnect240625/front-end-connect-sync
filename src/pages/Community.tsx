@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,7 +43,7 @@ export default function Community() {
         .from('community_messages')
         .select(`
           *,
-          profiles (
+          profiles!community_messages_user_id_fkey (
             full_name
           )
         `)
