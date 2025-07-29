@@ -43,7 +43,7 @@ export default function Community() {
         .from('community_messages')
         .select(`
           *,
-          profiles!community_messages_user_id_fkey (
+          profiles!inner (
             full_name
           )
         `)
@@ -55,7 +55,15 @@ export default function Community() {
         return;
       }
 
-      setMessages(data || []);
+      // Type assertion to handle the join result
+      const messagesWithProfiles = (data || []).map(msg => ({
+        ...msg,
+        profiles: msg.profiles && typeof msg.profiles === 'object' && 'full_name' in msg.profiles 
+          ? msg.profiles 
+          : null
+      })) as CommunityMessage[];
+
+      setMessages(messagesWithProfiles);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast.error('Failed to load messages');
