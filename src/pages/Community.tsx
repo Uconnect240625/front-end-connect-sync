@@ -57,7 +57,7 @@ const Community = () => {
         .from('community_messages')
         .select(`
           *,
-          profiles:user_id (
+          profiles!community_messages_user_id_fkey (
             full_name
           )
         `)
