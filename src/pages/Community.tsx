@@ -39,6 +39,7 @@ export default function Community() {
 
   const fetchMessages = async () => {
     try {
+      console.log('Fetching community messages...');
       const { data, error } = await supabase
         .from('community_messages')
         .select(`
@@ -55,14 +56,20 @@ export default function Community() {
         return;
       }
 
-      // Type assertion to handle the join result
-      const messagesWithProfiles = (data || []).map(msg => ({
-        ...msg,
-        profiles: msg.profiles && typeof msg.profiles === 'object' && 'full_name' in msg.profiles 
-          ? msg.profiles 
-          : null
-      })) as CommunityMessage[];
+      console.log('Raw messages data:', data);
 
+      // Type assertion to handle the join result with proper null checking
+      const messagesWithProfiles = (data || []).map(msg => {
+        console.log('Processing message:', msg);
+        return {
+          ...msg,
+          profiles: msg.profiles && typeof msg.profiles === 'object' && 'full_name' in msg.profiles 
+            ? msg.profiles as { full_name: string }
+            : null
+        };
+      }) as CommunityMessage[];
+
+      console.log('Processed messages:', messagesWithProfiles);
       setMessages(messagesWithProfiles);
     } catch (error) {
       console.error('Error fetching messages:', error);

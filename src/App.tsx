@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/hooks/useAuth';
@@ -19,17 +20,23 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import NotFound from '@/pages/NotFound';
 import './App.css';
 
-// Create a client
+// Create a client with error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
       retry: 1,
     },
   },
 });
 
 function App() {
+  console.log('App component mounting...');
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
