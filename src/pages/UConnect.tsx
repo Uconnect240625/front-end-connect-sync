@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -25,9 +24,9 @@ const UConnect = () => {
     icon: 'https://img.icons8.com/color/96/calendar--v1.png',
     route: '/events'
   }, {
-    name: 'Community',
-    icon: 'https://img.icons8.com/color/96/group.png',
-    route: '/community'
+    name: 'Help Center',
+    icon: 'https://img.icons8.com/color/96/help.png',
+    route: '/help-center'
   }];
   const openFeature = (route: string) => {
     navigate(route);
@@ -51,14 +50,6 @@ const UConnect = () => {
               </div>)}
           </section>
 
-          {/* Help Center - Centered below the grid */}
-          <div className="flex justify-center mt-6">
-            <div className="bg-card rounded-2xl p-4 text-center shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-accent cursor-pointer border border-border w-40" onClick={() => openFeature('/help-center')}>
-              <img src="https://img.icons8.com/color/96/help.png" alt="Help Center" className="w-12 h-12 mx-auto mb-3" />
-              <span className="block font-semibold text-card-foreground">Help Center</span>
-            </div>
-          </div>
-
           <div className="text-center mt-8 space-y-3">
             <div className="flex gap-2 justify-center flex-wrap">
               <button onClick={() => navigate('/announcements')} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm">
@@ -71,6 +62,12 @@ const UConnect = () => {
             </div>
             
             <div className="flex gap-2 justify-center flex-wrap">
+              
+              
+              
+              
+              
+              
               <button onClick={() => navigate('/settings')} className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm">
                 ⚙️ Settings
               </button>

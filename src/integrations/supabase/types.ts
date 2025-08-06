@@ -112,45 +112,6 @@ export type Database = {
           },
         ]
       }
-      community_messages: {
-        Row: {
-          created_at: string | null
-          file_name: string | null
-          file_size: number | null
-          file_type: string | null
-          file_url: string | null
-          id: string
-          message: string | null
-          university_id: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          file_name?: string | null
-          file_size?: number | null
-          file_type?: string | null
-          file_url?: string | null
-          id?: string
-          message?: string | null
-          university_id: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          file_name?: string | null
-          file_size?: number | null
-          file_type?: string | null
-          file_url?: string | null
-          id?: string
-          message?: string | null
-          university_id?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       complaints: {
         Row: {
           admin_response: string | null
