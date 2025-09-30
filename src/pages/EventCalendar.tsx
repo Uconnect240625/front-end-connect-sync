@@ -182,21 +182,21 @@ const EventCalendar = () => {
   const canCreateClubEvents = profile?.role === 'club';
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-lg mx-auto">
         <header className="text-center mb-6">
           <button 
             onClick={() => navigate('/uconnect')}
-            className="mb-4 text-blue-600 hover:text-blue-800 flex items-center justify-center mx-auto"
+            className="mb-4 text-primary hover:text-primary/80 flex items-center justify-center mx-auto"
           >
             ← Back to U Connect
           </button>
           
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Calendar className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-semibold text-gray-800">Event Calendar</h2>
+            <Calendar className="w-6 h-6 text-primary" />
+            <h2 className="text-2xl font-semibold text-foreground">Event Calendar</h2>
           </div>
-          <p className="text-gray-600">Stay updated with all things happening</p>
+          <p className="text-muted-foreground">Stay updated with all things happening</p>
         </header>
 
         {/* Create Button - Show for admins on official tab or clubs on club tab */}
@@ -223,8 +223,8 @@ const EventCalendar = () => {
           <button
             className={`px-6 py-3 rounded-full font-medium transition-all ${
               activeTab === 'official'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
             }`}
             onClick={() => switchTab('official')}
           >
@@ -233,8 +233,8 @@ const EventCalendar = () => {
           <button
             className={`px-6 py-3 rounded-full font-medium transition-all ${
               activeTab === 'club'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
             }`}
             onClick={() => switchTab('club')}
           >
@@ -246,17 +246,17 @@ const EventCalendar = () => {
           {activeTab === 'official' ? (
             // Official events
             officialEvents.map((event) => (
-              <div key={event.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div key={event.id} className="bg-card rounded-xl p-4 shadow-sm border border-border">
                 <div className="flex gap-4">
-                  <div className="text-blue-600 font-bold text-lg text-center min-w-[80px]">
+                  <div className="text-primary font-bold text-lg text-center min-w-[80px]">
                     {event.date}
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-lg text-gray-800 mb-1">{event.title}</h3>
-                        <p className="text-gray-600 mb-2 text-sm">{event.description}</p>
-                        <span className="text-sm text-gray-500">{event.location}</span>
+                        <h3 className="font-semibold text-lg text-card-foreground mb-1">{event.title}</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">{event.description}</p>
+                        <span className="text-sm text-muted-foreground">{event.location}</span>
                       </div>
                       {canDeleteOfficialEvents && (
                         <Button
@@ -277,25 +277,25 @@ const EventCalendar = () => {
             // Club events from database
             loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-600 mt-2">Loading events...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground mt-2">Loading events...</p>
               </div>
             ) : clubEvents.length > 0 ? (
               clubEvents.map((event) => (
-                <div key={event.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <div key={event.id} className="bg-card rounded-xl p-4 shadow-sm border border-border">
                   <div className="flex gap-4">
-                    <div className="text-blue-600 font-bold text-lg text-center min-w-[80px]">
+                    <div className="text-primary font-bold text-lg text-center min-w-[80px]">
                       {formatEventDate(event.event_date)}
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-gray-800 mb-1">{event.title}</h3>
-                          <p className="text-gray-600 mb-2 text-sm">{event.description}</p>
+                          <h3 className="font-semibold text-lg text-card-foreground mb-1">{event.title}</h3>
+                          <p className="text-muted-foreground mb-2 text-sm">{event.description}</p>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-500">{event.location}</span>
+                            <span className="text-sm text-muted-foreground">{event.location}</span>
                             {event.event_time && (
-                              <span className="text-sm text-blue-600 font-medium">
+                              <span className="text-sm text-primary font-medium">
                                 {event.event_time}
                               </span>
                             )}
@@ -318,7 +318,7 @@ const EventCalendar = () => {
               ))
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-600">No club events available</p>
+                <p className="text-muted-foreground">No club events available</p>
               </div>
             )
           )}

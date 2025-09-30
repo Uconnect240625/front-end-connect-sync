@@ -11,18 +11,18 @@ export const NotesHub = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
           <button 
             onClick={() => navigate('/uconnect')}
-            className="mb-4 text-blue-600 hover:text-blue-800 flex items-center gap-2"
+            className="mb-4 text-primary hover:text-primary/80 flex items-center gap-2"
           >
             <ArrowLeft size={16} />
             Back to U Connect
           </button>
           
-          <h1 className="text-2xl font-bold text-center mb-6">📚 U Connect Notes Hub</h1>
+          <h1 className="text-2xl font-bold text-center mb-6 text-foreground">📚 U Connect Notes Hub</h1>
 
           <Tabs defaultValue="browse" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
