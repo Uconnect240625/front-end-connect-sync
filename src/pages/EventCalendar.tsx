@@ -204,7 +204,7 @@ const EventCalendar = () => {
           <div className="flex justify-center mb-4">
             <Button 
               size="sm"
-              className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800"
+              className="flex items-center gap-2 bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
               onClick={() => {
                 if (activeTab === 'official') {
                   setIsEventFormOpen(true);
