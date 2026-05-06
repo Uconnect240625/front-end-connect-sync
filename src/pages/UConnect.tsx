@@ -75,7 +75,7 @@ const UConnect = () => {
           </div>
 
           <footer className="text-center mt-8">
-            <p className="text-sm text-muted-foreground">© 2025 UConnect. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">© 2026 UConnect. All rights reserved.</p>
           </footer>
         </div>
       </div>
