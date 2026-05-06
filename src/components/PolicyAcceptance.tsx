@@ -280,7 +280,7 @@ const PolicyAcceptance = () => {
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">COPYRIGHT NOTICE</h3>
                 <p className="text-sm text-gray-600">
-                  © 2025 U Connect. All Rights Reserved. The content, layout, design, and policies of U Connect are the intellectual property of U Connect. No part of this document may be reproduced, stored, or transmitted in any form without prior written permission from the Founder.
+                  © 2026 U Connect. All Rights Reserved. The content, layout, design, and policies of U Connect are the intellectual property of U Connect. No part of this document may be reproduced, stored, or transmitted in any form without prior written permission from the Founder.
                 </p>
               </div>
             </div>
