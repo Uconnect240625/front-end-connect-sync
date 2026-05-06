@@ -7,10 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -111,6 +111,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      community_messages: {
+        Row: {
+          created_at: string | null
+          file_name: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          message: string | null
+          university_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          message?: string | null
+          university_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          message?: string | null
+          university_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       complaints: {
         Row: {
@@ -550,30 +589,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_missing_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      create_missing_profiles: { Args: never; Returns: undefined }
       get_all_profiles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
-          id: string
+          created_at: string
           full_name: string
+          id: string
+          phone: string
           role: Database["public"]["Enums"]["user_role"]
           university_id: string
-          phone: string
-          created_at: string
           updated_at: string
         }[]
       }
       get_user_role: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
-      get_user_university_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_user_university_id: { Args: never; Returns: string }
     }
     Enums: {
       approval_status: "pending" | "approved" | "rejected"
