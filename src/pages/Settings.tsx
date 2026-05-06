@@ -77,7 +77,7 @@ const Settings = () => {
           </Button>
 
           <div className="text-center text-sm text-muted-foreground mt-4">
-            UConnect v1.0 • Crafted by Kabir 🔥
+            UConnect v1.0 
           </div>
         </div>
       </div>
